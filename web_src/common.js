@@ -9,6 +9,9 @@ var userLen = 6;
 var userID;
 var phoneLen = 10;
 var zipcodeLen = 5;
+var stock_SessionID;
+var stock_UserID;
+
 
 var ERRCODE = {
                 INVALID_PASSWORD:"Password length must be at least 6 characters",
@@ -82,8 +85,8 @@ function changePane(obj,pane)
 		doc.getElementById('landing_panel').style.display = 'block';
 		doc.getElementById('register_panel').style.display = 'none';	
 		doc.getElementById('main_sub_panel').style.display = 'none';
-		document.getElementById('login').style.display = 'block';
-		document.getElementById('logged_on').style.display = 'none';
+		doc.getElementById('login').style.display = 'block';
+		doc.getElementById('logged_on').style.display = 'none';
 
 	}
 	else
@@ -91,8 +94,21 @@ function changePane(obj,pane)
 		doc.getElementById('landing_panel').style.display = 'none';
 		doc.getElementById('register_panel').style.display = 'none';	
 		doc.getElementById('main_sub_panel').style.display = 'block';	
+		doc.getElementById('login').style.display = 'none';
+		doc.getElementById('logged_on').style.display = 'block';
+		displayLoggedOn();
 	}
 
+
+}
+
+function displayLoggedOn()
+{
+	stock_UserID = getCookie('stock_UserID');
+	var spanLoggedOn = document.getElementById('form_login');
+	spanLoggedOn.innerHTML = stock_UserID + " LOGGED IN | " +
+	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> " +
+	" | <a href=\"/cgi-bin/profile_page.cgi?userName=" + stock_UserID + "\">" +  " update profile </a> ";
 
 }
 
@@ -159,9 +175,9 @@ function processSignInForm(form)
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
 		if(request.readyState == 4) {
-			if(request.status == 200) {
-	/*			document.getElementById("reg_response").innerHTML = "<span style='background-color:blue;'> <h3>" + request.responseText + " </h3> </span>"; */
-				setTimeout('changePane(document,null)',5000);	
+			if(request.status == 200) 
+			{
+				setTimeout('changePane(document,null)',2000);	
 
 			} 
 			else	
