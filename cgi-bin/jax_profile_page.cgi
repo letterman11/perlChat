@@ -14,6 +14,8 @@ use CGI::Carp qw(fatalsToBrowser);
 use DBI;
 require '/home/abrooks/www/chatterBox/cgi-bin/config.pl';
 
+$CGI::POST_MAX=1024 * 10;  # max 10K posts
+$CGI::DISABLE_UPLOADS = 1;  # no uploads
 
 my @profile_array;
 my $query = new CGI;

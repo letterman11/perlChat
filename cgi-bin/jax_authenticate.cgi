@@ -14,6 +14,8 @@ use DBI;
 require '/home/abrooks/www/chatterBox/cgi-bin/config.pl';
 
 
+$CGI::POST_MAX=1024 * 10;  # max 10K posts
+$CGI::DISABLE_UPLOADS = 1;  # no uploads
 
 my $userID = 0;
 my $userName = 1;
@@ -47,6 +49,8 @@ $dbh->disconnect();
 
 if (not defined ($user_row[1])) {
 	#---- CGI header response ----#
+	print $query->header(-status=>'450 Application Authentication Failed',
+			    );	
 } else
 {
 	my $stockSessionID = Util::genSessionID();
@@ -76,7 +80,11 @@ if (not defined ($user_row[1])) {
 				$stockSessionID, 
 				$user_row[$userName]);
 
-
 	#---- CGI header response ----#
+	print $query->header(-status=>200,
+			     -cookie=>[$c1,$c2,$c3]
+			    );
+
 }
 
+exit;
