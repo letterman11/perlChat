@@ -1,0 +1,7 @@
+use Widgets;
+
+CREATE TABLE chat_room (
+ROOM_ID			CHAR(15) NOT NULL,
+ROOM_NAME		CHAR(15),
+CREATE_TS		DATETIME	
+);
