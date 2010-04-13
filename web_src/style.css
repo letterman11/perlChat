@@ -118,6 +118,10 @@ body {
 	text-decoration:none;
 }
 
+#err_text {
+	color:gray;
+}
+
 #logged_on {
 	display: block;
 	float: right;
@@ -200,8 +204,16 @@ body {
 	height:100px;
 	width:100px;
 	border:inset;
+	overflow:auto;
 }
 
+.roomDiv1 {
+	background-color:#919191;
+}
+
+.roomDiv2 {
+	background-color:#787878;
+}
 	
 #bot_disp_con {
 	background-color:#8a9ad2;

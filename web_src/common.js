@@ -55,6 +55,8 @@ function logOut()
 	for(i=0; i<arguments.length; i++) {
 		eraseCookie(arguments[i]);
 	}
+	deleteRoomPane();	
+	
 }
 
 function init()
@@ -66,8 +68,82 @@ function init()
 		document.getElementById('main_sub_panel').style.display = 'block';
 		document.getElementById('landing_panel').style.display = 'none';
 		document.getElementById('register_panel').style.display = 'none';	
+		loadRooms();
 	}
 	
+}
+
+function loadRooms()
+{
+
+	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_server.cgi?req=roomIDs";
+	request = HTTP.newRequest();		
+	request.onreadystatechange = function() {
+		if(request.readyState == 4) {
+			if(request.status == 200) {
+			
+				loadRoomPane(request.responseText);
+			} 
+			else	
+			{
+				alert(request.statusText);
+				document.getElementById('top_sel_con').innerHTML = request.statusText;	
+			}
+		}
+
+
+	};
+
+	request.open("GET", url);
+	request.setRequestHeader("Content-Type",
+					"text/html");
+	request.send(null);
+
+}
+
+function loadRoomPane(rspObj)
+{
+	
+	var roomArray = eval (rspObj);
+	var roomSelDiv = document.getElementById('top_sel_con');
+
+	for(i=0;  i < roomArray.length; i++) 
+	{
+		var newRmDiv = document.createElement("div");	
+		var rmTxtNode = document.createTextNode(roomArray[i]);	
+		newRmDiv.appendChild(rmTxtNode);
+
+		newRmDiv.className = i % 2 ? ' roomDiv1' : ' roomDiv2';
+
+		if(window.attachEvent) 
+		{
+			newRmDiv.attachEvent('onclick', logIntoRoom);
+		}
+		else
+		{
+			newRmDiv.addEventListener('click', logIntoRoom, false);
+		}
+		
+		roomSelDiv.appendChild(newRmDiv);
+
+	}
+
+}
+
+function deleteRoomPane()
+{
+	var roomSelDiv = document.getElementById('top_sel_con');
+	
+	while(roomSelDiv.hasChildNodes())
+	{
+		roomSelDiv.removeChild(roomSelDiv.firstChild);
+	}
+}
+
+function logIntoRoom(roomName)
+{
+   alert("hello");
+
 }
 
 function changePane(obj,pane)
@@ -97,6 +173,7 @@ function changePane(obj,pane)
 		doc.getElementById('login').style.display = 'none';
 		doc.getElementById('logged_on').style.display = 'block';
 		displayLoggedOn();
+		loadRooms();
 	}
 
 
@@ -158,6 +235,8 @@ function clearValidationRegistration()
 function processSignInForm(form)
 {
 
+	//Adhoc will replace with more structured code
+	document.getElementById("err_text").innerHTML =  ""; 
 	var i;
 	var request;
 	var postString = "";
@@ -182,7 +261,7 @@ function processSignInForm(form)
 			} 
 			else	
 			{
-	/*			document.getElementById("reg_response").innerHTML = "<span style='background-color:red;'> <h3>" + request.statusText + " </h3> </span>"; */
+				document.getElementById("err_text").innerHTML =  request.statusText; 
 
 			} 
 
@@ -210,7 +289,8 @@ function processForm(form)
 	var request;
 	var postString = "";
 	var frm = form;
-	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/respond.cgi";
+	//var url = "http://192.168.0.197:8080/chatBox/cgi-bin/respond.cgi";
+	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_registration.cgi";
 	var frmElements = form.elements;
 
 	for (i=0; i < frmElements.length-1; i++) 
@@ -225,8 +305,8 @@ function processForm(form)
 	request.onreadystatechange = function() {
 		if(request.readyState == 4) {
 			if(request.status == 200) {
-				document.getElementById("reg_response").innerHTML = "<span style='background-color:blue;'> <h3>" + request.responseText + " </h3> </span>";
-				setTimeout('changePane(document,null)',5000);	
+				document.getElementById("reg_response").innerHTML = "<span style='background-color:blue;'> <h3>" + request.statusText + " </h3> </span>";
+			//	setTimeout('changePane(document,null)',5000);	
 
 			} 
 			else	
