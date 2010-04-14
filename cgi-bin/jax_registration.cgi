@@ -1,12 +1,8 @@
 #!/usr/bin/perl -wT
 
-############################################################################
-#--------------- Initial checkin placeholder not useful for Ajax ----------#
-############################################################################
 
 use strict;
 use lib "/home/abrooks/www/chatterBox/script_src";
-use GenView;
 use GenStatus;
 use Error;
 use GenError;
@@ -24,7 +20,9 @@ my $query = new CGI;
 my $callObj =  Util::formValidation($query);
 
 if (ref $callObj eq 'Error') {
-	GenError->new($callObj)->display("Invalid form submission\n");
+
+	print $query->header(-status=>'451 Invalid Form Submission'
+				);
 	
 } else {
 
@@ -56,11 +54,17 @@ if (ref $callObj eq 'Error') {
 
 	};
 
+	if ($@) 
+	{
+		print $query->header(-status=>'452 Application Error'
+						);
+	}
+	else
+	{
+		print $query->header(-status=>'200 Registration Successful'
+					);
+	}
 
-	#---- CGI header response ----#
-	GenError->new(Error->new($DBI::err))->display("Application Error occurred try later\n") and die "$@" if ($@);
-
-	GenStatus->new()->display("Registration successful for $sqlHash->{userName}\n");
 }
 
 exit;

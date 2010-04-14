@@ -1,8 +1,5 @@
 #!/usr/bin/perl -wT
 
-############################################################################
-#--------------- Initial checkin placeholder not useful for Ajax ----------#
-############################################################################
 use strict;
 use lib "/home/abrooks/www/chatterBox/script_src";
 use Util;
@@ -49,7 +46,7 @@ $dbh->disconnect();
 
 if (not defined ($user_row[1])) {
 	#---- CGI header response ----#
-	print $query->header(-status=>'450 Application Authentication Failed',
+	print $query->header(-status=>'450 Invalid UserID/Password Entry',
 			    );	
 } else
 {
