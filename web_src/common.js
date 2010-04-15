@@ -9,9 +9,6 @@ var userLen = 6;
 var userID;
 var phoneLen = 10;
 var zipcodeLen = 5;
-var stock_SessionID;
-var stock_UserID;
-
 
 var ERRCODE = {
                 INVALID_PASSWORD:"Password length must be at least 6 characters",
@@ -52,23 +49,34 @@ function eraseCookie(name)
 
 function logOut()
 {
+	deleteRoomPaneLogout();	
+
 	for(i=0; i<arguments.length; i++) {
 		eraseCookie(arguments[i]);
 	}
-	deleteRoomPane();	
 	
 }
 
 function init()
 {
-	stock_SessionID = getCookie('stock_SessionID');
+	var stock_SessionID = getCookie('stock_SessionID');
+	var roomSelected = getCookie('roomSelected');
+
 	if ((stock_SessionID != null && stock_SessionID != 'null')) {
 		document.getElementById('login').style.display = 'none';
 		document.getElementById('logged_on').style.display = 'block';
 		document.getElementById('main_sub_panel').style.display = 'block';
 		document.getElementById('landing_panel').style.display = 'none';
 		document.getElementById('register_panel').style.display = 'none';	
-		loadRooms();
+
+		if(roomSelected == null || roomSelected == 'null')
+		{
+			loadRooms();
+		}
+		else
+		{
+			setRoomPane(roomSelected);
+		}
 	}
 	
 }
@@ -130,6 +138,13 @@ function loadRoomPane(rspObj)
 
 }
 
+function deleteLoadRoomPane()
+{
+	deleteRoomPaneLogout();
+	loadRooms();
+	document.getElementById('logout_room_box').style.display = 'none';
+}
+
 function deleteRoomPane()
 {
 	var roomSelDiv = document.getElementById('top_sel_con');
@@ -140,9 +155,125 @@ function deleteRoomPane()
 	}
 }
 
-function logIntoRoom(roomName)
+function deleteRoomPaneLogout()
 {
-   alert("hello");
+	var stock_UserID = getCookie('stock_UserID');
+	var roomSelected = getCookie('roomSelected');
+	var roomSelDiv = document.getElementById('top_sel_con');
+	
+	while(roomSelDiv.hasChildNodes())
+	{
+		roomSelDiv.removeChild(roomSelDiv.firstChild);
+	}
+
+	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_server.cgi?req=roomLogout";
+	url += "&" + "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
+	//alert("URL " + roomSelected);
+
+	request = HTTP.newRequest();		
+	request.onreadystatechange = function() {
+		if(request.readyState == 4) {
+			if(request.status == 200) {
+				document.getElementById('logout_room_box').style.display = 'none';
+				eraseCookie('roomSelected');
+				//startAjaxPing(stock_UserID,this.firstChild.data);	
+				
+			} 
+			else	
+			{
+				alert(request.statusText);
+			}
+		}
+
+
+	};
+
+	request.open("GET", url);
+	request.setRequestHeader("Content-Type",
+					"text/html");
+	request.send(null);
+}
+
+function logIntoRoom()
+{
+
+	var roomDiv;
+	var stock_UserID = getCookie('stock_UserID');
+	if(window.attachEvent)
+	{
+		roomDiv = window.event.srcElement;
+	}
+	else
+	{
+		roomDiv = this;
+	}	
+
+
+	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_server.cgi?req=roomLogin";
+	url += "&" + "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomDiv.firstChild.data);
+
+	request = HTTP.newRequest();		
+	request.onreadystatechange = function() {
+		if(request.readyState == 4) {
+			if(request.status == 200) {
+
+				createCookie('roomSelected', roomDiv.firstChild.data);
+				setRoomPane(roomDiv);
+				//startAjaxPing(stock_UserID,this.firstChild.data);	
+				
+			} 
+			else	
+			{
+				alert(request.statusText);
+			}
+		}
+
+
+	};
+
+	request.open("GET", url);
+	request.setRequestHeader("Content-Type",
+					"text/html");
+	request.send(null);
+
+
+
+}
+
+function setRoomPane(roomDiv)
+{
+	if(typeof roomDiv  != "string") 
+	{
+		var parentDiv = roomDiv.parentNode;
+		deleteRoomPane();
+		parentDiv.appendChild(roomDiv);	
+	}
+	else
+	{
+		var newRmDiv = document.createElement("div")
+		var rmTxtNode = document.createTextNode(roomDiv);
+		newRmDiv.appendChild(rmTxtNode);	
+		newRmDiv.className = ' roomDiv1';
+
+		var roomSelDiv = document.getElementById('top_sel_con');
+		roomSelDiv.appendChild(newRmDiv);	
+	}
+	
+	var rmLogOut = document.getElementById('logout_room_box');	
+	rmLogOut.style.display = 'block';
+
+	if(window.attachEvent) 
+	{
+		rmLogOut.attachEvent('onclick', deleteLoadRoomPane);
+	}
+	else
+	{
+		rmLogOut.addEventListener('click', deleteLoadRoomPane, false);
+	}
+	
+	//--------------------------------------------------------	
+	//Look into DOM structure of container for additional node
+	//--------------------------------------------------------	
 
 }
 
@@ -184,7 +315,7 @@ function displayLoggedOn()
 	stock_UserID = getCookie('stock_UserID');
 	var spanLoggedOn = document.getElementById('form_login');
 	spanLoggedOn.innerHTML = stock_UserID + " LOGGED IN | " +
-	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> " +
+	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> " +
 	" | <a href=\"/cgi-bin/profile_page.cgi?userName=" + stock_UserID + "\">" +  " update profile </a> ";
 
 }
