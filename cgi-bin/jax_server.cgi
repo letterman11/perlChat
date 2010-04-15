@@ -6,6 +6,7 @@ use Util;
 use DbConfig;
 use CGI qw /:standard/;
 use CGI::Cookie;
+use CGI::Carp;
 use CGI::Carp qw(fatalsToBrowser);
 use DBI;
 require '/home/abrooks/www/chatterBox/cgi-bin/config.pl';
@@ -19,7 +20,7 @@ my $initSessionObject = Util::validateSession();
 
 if (ref $initSessionObject eq 'SessionObject')  
 {
-
+	#TO DO: Restructure handling of db login failure
 	my $dbconf = DbConfig->new();
 	my $dbh = DBI->connect( "dbi:mysql:"  
 			. $dbconf->dbName() . ":"
@@ -74,13 +75,79 @@ if (ref $initSessionObject eq 'SessionObject')
 			print $query->header(-status=>200,
 					     -Content_Type=>'text/javascript'
 						);
-
 			print $js_room_array;
 
 		}
 		
 	}
+	elsif($query->param('req') eq 'roomLogin')
+	{
+		my $userID = $query->param('userID');
+		my $roomID = $query->param('roomID');
+		
+		$sqlstr = "insert into user_cr values ( '$userID', '$roomID', NOW(), '$roomID')";
 
+		carp("INSERT $sqlstr");
+
+			eval {
+				my $sth = $dbh->prepare($sqlstr);
+				
+				$sth->execute();
+
+				$sth->finish();
+
+				$dbh->disconnect();
+
+			};
+		
+			if($@) 
+			{
+				print $query->header(-status=>'452 Application Error'
+							);	
+			}
+			else
+			{
+				
+				print $query->header(-status=>'200 OK'
+							);
+				print "Room Login Successful";
+
+			}
+
+	}
+	elsif($query->param('req') eq 'roomLogout')
+	{
+
+		my $userID = $query->param('userID');
+		my $roomID = $query->param('roomID');
+
+		$sqlstr = "delete from user_cr where user_id = '$userID'";
+
+		carp("DELETE $sqlstr");
+
+		eval {
+			my $sth = $dbh->prepare($sqlstr);
+			
+			$sth->execute();
+
+			$sth->finish();
+
+			$dbh->disconnect();
+		};
+	
+		if($@) 
+		{
+			print $query->header(-status=>'452 Application Error'
+						);	
+		}
+		else
+		{
+			print $query->header(-status=>'200 OK'
+						);
+			print "Room Logout Successful";
+		}
+
+	}
 	
 } 
 else
