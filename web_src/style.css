@@ -187,6 +187,14 @@ body {
 	color:gray;
 }
 
+.logout_room_box {
+	margin:13px 0 0 0;
+	color:gray;	
+	float:left;
+	border:solid 1pt gray;
+	display:none;
+}
+
 .right_panel {
 	padding:10px;
 	float:right;
