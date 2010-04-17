@@ -9,6 +9,8 @@ var userLen = 6;
 var userID;
 var phoneLen = 10;
 var zipcodeLen = 5;
+var host = "http://192.168.0.197:8080";
+
 
 var ERRCODE = {
                 INVALID_PASSWORD:"Password length must be at least 6 characters",
@@ -50,6 +52,7 @@ function eraseCookie(name)
 function logOut()
 {
 	deleteRoomPaneLogout();	
+	document.getElementById('logout_room_box').style.display = 'none';
 
 	for(i=0; i<arguments.length; i++) {
 		eraseCookie(arguments[i]);
@@ -84,7 +87,7 @@ function init()
 function loadRooms()
 {
 
-	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_server.cgi?req=roomIDs";
+	var url = host + "/chatBox/cgi-bin/jax_server.cgi?req=roomIDs";
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
 		if(request.readyState == 4) {
@@ -103,8 +106,6 @@ function loadRooms()
 	};
 
 	request.open("GET", url);
-	request.setRequestHeader("Content-Type",
-					"text/html");
 	request.send(null);
 
 }
@@ -140,6 +141,7 @@ function loadRoomPane(rspObj)
 
 function deleteLoadRoomPane()
 {
+
 	deleteRoomPaneLogout();
 	loadRooms();
 	document.getElementById('logout_room_box').style.display = 'none';
@@ -151,8 +153,19 @@ function deleteRoomPane()
 	
 	while(roomSelDiv.hasChildNodes())
 	{
+
+		if(window.attachEvent)
+		{
+			roomSelDiv.firstChild.detachEvent("onclick", logIntoRoom);
+		}
+		else
+		{
+			roomSelDiv.firstChild.removeEventListener("click", logIntoRoom, false);
+		}
+		
 		roomSelDiv.removeChild(roomSelDiv.firstChild);
 	}
+	document.getElementById('logout_room_box').style.display = 'none';
 }
 
 function deleteRoomPaneLogout()
@@ -160,15 +173,28 @@ function deleteRoomPaneLogout()
 	var stock_UserID = getCookie('stock_UserID');
 	var roomSelected = getCookie('roomSelected');
 	var roomSelDiv = document.getElementById('top_sel_con');
+	var postString;
 	
 	while(roomSelDiv.hasChildNodes())
 	{
+		if(window.attachEvent)
+		{
+			roomSelDiv.firstChild.detachEvent("onclick", logIntoRoom);
+		}
+		else
+		{
+			roomSelDiv.firstChild.removeEventListener("click", logIntoRoom, false);
+		}
+
 		roomSelDiv.removeChild(roomSelDiv.firstChild);
 	}
 
-	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_server.cgi?req=roomLogout";
-	url += "&" + "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
-	//alert("URL " + roomSelected);
+	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
+
+	 postString  = "req=roomLogout&";
+	 postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
+	 postString += "roomID=" + encodeURIComponent(roomSelected);
+
 
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
@@ -176,8 +202,6 @@ function deleteRoomPaneLogout()
 			if(request.status == 200) {
 				document.getElementById('logout_room_box').style.display = 'none';
 				eraseCookie('roomSelected');
-				//startAjaxPing(stock_UserID,this.firstChild.data);	
-				
 			} 
 			else	
 			{
@@ -188,10 +212,12 @@ function deleteRoomPaneLogout()
 
 	};
 
-	request.open("GET", url);
+	request.open("POST", url, false);
 	request.setRequestHeader("Content-Type",
-					"text/html");
-	request.send(null);
+					"application/x-www-form-urlencoded");
+	request.send(postString);
+
+
 }
 
 function logIntoRoom()
@@ -199,6 +225,7 @@ function logIntoRoom()
 
 	var roomDiv;
 	var stock_UserID = getCookie('stock_UserID');
+
 	if(window.attachEvent)
 	{
 		roomDiv = window.event.srcElement;
@@ -209,17 +236,20 @@ function logIntoRoom()
 	}	
 
 
-	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_server.cgi?req=roomLogin";
-	url += "&" + "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomDiv.firstChild.data);
+	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
+
+         postString  = "req=roomLogin&";
+         postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
+         postString += "roomID=" + encodeURIComponent(roomDiv.firstChild.data);
+
 
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
 		if(request.readyState == 4) {
 			if(request.status == 200) {
-
 				createCookie('roomSelected', roomDiv.firstChild.data);
-				setRoomPane(roomDiv);
-				//startAjaxPing(stock_UserID,this.firstChild.data);	
+				setRoomPane(roomDiv.firstChild.data);
+				//startAjaxPing(stock_UserID,roomDiv);	
 				
 			} 
 			else	
@@ -231,45 +261,29 @@ function logIntoRoom()
 
 	};
 
-	request.open("GET", url);
+	request.open("POST", url);
 	request.setRequestHeader("Content-Type",
-					"text/html");
-	request.send(null);
+					"application/x-www-form-urlencoded");
+	request.send(postString);
 
 
 
 }
 
-function setRoomPane(roomDiv)
+function setRoomPane(roomDivText)
 {
-	if(typeof roomDiv  != "string") 
-	{
-		var parentDiv = roomDiv.parentNode;
-		deleteRoomPane();
-		parentDiv.appendChild(roomDiv);	
-	}
-	else
-	{
-		var newRmDiv = document.createElement("div")
-		var rmTxtNode = document.createTextNode(roomDiv);
-		newRmDiv.appendChild(rmTxtNode);	
-		newRmDiv.className = ' roomDiv1';
+	deleteRoomPane();
+	var newRmDiv = document.createElement("div")
+	var rmTxtNode = document.createTextNode(roomDivText);
+	newRmDiv.appendChild(rmTxtNode);	
+	newRmDiv.className = ' roomDiv1';
 
-		var roomSelDiv = document.getElementById('top_sel_con');
-		roomSelDiv.appendChild(newRmDiv);	
-	}
+	var roomSelDiv = document.getElementById('top_sel_con');
+	roomSelDiv.appendChild(newRmDiv);	
 	
 	var rmLogOut = document.getElementById('logout_room_box');	
 	rmLogOut.style.display = 'block';
 
-	if(window.attachEvent) 
-	{
-		rmLogOut.attachEvent('onclick', deleteLoadRoomPane);
-	}
-	else
-	{
-		rmLogOut.addEventListener('click', deleteLoadRoomPane, false);
-	}
 	
 	//--------------------------------------------------------	
 	//Look into DOM structure of container for additional node
@@ -372,7 +386,7 @@ function processSignInForm(form)
 	var request;
 	var postString = "";
 	var frm = form;
-	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_authenticate.cgi";
+	var url = host + "/chatBox/cgi-bin/jax_authenticate.cgi";
 	var frmElements = form.elements;
 
 	for (i=0; i < frmElements.length-1; i++) 
@@ -387,7 +401,7 @@ function processSignInForm(form)
 		if(request.readyState == 4) {
 			if(request.status == 200) 
 			{
-				setTimeout('changePane(document,null)',2000);	
+				setTimeout('changePane(document,null)',1000);	
 
 			} 
 			else	
@@ -419,9 +433,7 @@ function processForm(form)
 	var i;
 	var request;
 	var postString = "";
-	var frm = form;
-	//var url = "http://192.168.0.197:8080/chatBox/cgi-bin/respond.cgi";
-	var url = "http://192.168.0.197:8080/chatBox/cgi-bin/jax_registration.cgi";
+	var url = host + "/chatBox/cgi-bin/jax_registration.cgi";
 	var frmElements = form.elements;
 
 	for (i=0; i < frmElements.length-1; i++) 
@@ -456,6 +468,20 @@ function processForm(form)
 	request.setRequestHeader("Content-Type",
 					"application/x-www-form-urlencoded");
 	request.send(postString);
+
+}
+
+function processSend(sendForm)
+{
+	var i;
+	var request;
+	var postString = "";
+	var url = host + "/chatBox/cgi-bin/jax_server.cgi?req=sendForm";
+	var frmElements = sendForm.elements;
+
+	postString += encodeURIComponent(frmElements[0].name) + "=" + encodeURIComponent(frmElements[0].value);
+
+	alert("CONTENT " + frmElements[0].value);
 
 }
 
