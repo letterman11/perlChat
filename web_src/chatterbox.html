@@ -7,7 +7,7 @@
 <script type="text/javascript" src="/chatBox/web_src/common.js"> </script> 
 <script type="text/javascript" src="/chatBox/web_src/ajax_lib.js"> </script> 
 </head>
-<body id="layout" onload="init()">
+<body id="layout" onload="init()" >
   <div class="center_div">
      <div id="header">
 	<div id="banner">
@@ -63,12 +63,12 @@
 		</textarea>
 	     </form>
 	     <div id="sub_button">
-	       <a href="javascript:void(0);"> <h1> SEND </h1> </a>
+	       <a href="javascript:processSend(document.chatInput);"> <h1> SEND </h1> </a>
 	     </div>
 	   </div>
        </div>
        <div class="logout_room_box" id="logout_room_box">
-	<h6> LOGOUT</h6>
+	<h6><a onclick="deleteLoadRoomPane()"> LOGOUT </a></h6>
        </div>
        <div class="right_panel">
 	  <div class="right_top_panel">
