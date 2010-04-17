@@ -30,9 +30,11 @@ if (ref $initSessionObject eq 'SessionObject')
 	        	or die "Cannot Connect to Database $DBI::errstr\n";
 	
 	my $sqlstr = ();
+	my $sqlstr2 = ();
 	my $sth = ();	
 	my $room_array = ();
 	my $row_count = ();
+	my $msg_user_array = ();
 
 	if($query->param('req') eq 'roomIDs')
 	{
@@ -45,7 +47,6 @@ if (ref $initSessionObject eq 'SessionObject')
 			$sth->execute();
 
 			$room_array = $sth->fetchall_arrayref;	
-			
 
 			$sth->finish();
 			
@@ -63,14 +64,15 @@ if (ref $initSessionObject eq 'SessionObject')
 			#JSON creation of room IDs
 
 			my $js_room_array = " [ ";
-			my $i = ();
-
-			for($i=0; $i < scalar(@{$room_array})-1; $i++) 
+			my $i = 0;
+			$js_room_array .= "'" . @{$room_array}[$i]->[0] . "'";
+			
+			for(++$i; $i < scalar(@{$room_array}); $i++) 
 			{
-				$js_room_array .=  "'" . @{$room_array}[$i]->[0] ."', ";
+				$js_room_array .=  ", '" . @{$room_array}[$i]->[0] ."'";
 			}
 
-			$js_room_array .=  "'" . @{$room_array}[$i]->[0] . "' ]; ";
+			$js_room_array .=  " ]; ";
 			
 			print $query->header(-status=>200,
 					     -Content_Type=>'text/javascript'
@@ -87,6 +89,7 @@ if (ref $initSessionObject eq 'SessionObject')
 		
 		$sqlstr = "insert into user_cr values ( '$userID', '$roomID', NOW(), '$roomID')";
 
+		
 		carp("INSERT $sqlstr");
 
 			eval {
@@ -95,8 +98,6 @@ if (ref $initSessionObject eq 'SessionObject')
 				$sth->execute();
 
 				$sth->finish();
-
-				$dbh->disconnect();
 
 			};
 		
@@ -107,13 +108,62 @@ if (ref $initSessionObject eq 'SessionObject')
 			}
 			else
 			{
+
+				$sqlstr2 = "select user_id from user_cr where room_id = '$roomID'";		
+
+				carp("SELECT $sqlstr2");
+		
+					eval {
+						$sth = $dbh->prepare($sqlstr2);
+						
+						$sth->execute();
+		
+						$msg_user_array = $sth->fetchall_arrayref;	
+
+						$sth->finish();
+		
+						$dbh->disconnect();
+		
+					};
 				
-				print $query->header(-status=>'200 OK'
-							);
-				print "Room Login Successful";
+					if($@) 
+					{
+						print $query->header(-status=>'452 Application Error2'
+							);	
+					}
+					else
+					{	
 
+						if (scalar(@{$msg_user_array}) > 1) 
+						{
+
+							my $js_msg_user_array = " [ ";
+							my $i = 0;
+
+							$js_msg_user_array .= "'" . @{$msg_user_array}[$i]->[0] . "'"; 
+				
+							for(++$i; $i < scalar(@{$msg_user_array}); $i++) 
+							{
+								$js_msg_user_array .=  ", '" . @{$msg_user_array}[$i]->[0] ."'";
+							}
+		
+							 $js_msg_user_array .= " ]; ";
+	
+							print $query->header(-status=>'200 OK',
+						     				-Content_Type=>'text/javascript'
+								);
+							
+							print $js_msg_user_array;
+	
+						}
+						else
+						{
+							print $query->header(-status=>'200 OK'
+										);
+						}
+
+					}
 			}
-
 	}
 	elsif($query->param('req') eq 'roomLogout')
 	{
@@ -146,6 +196,12 @@ if (ref $initSessionObject eq 'SessionObject')
 						);
 			print "Room Logout Successful";
 		}
+
+	}
+	elsif($query->param('req') eq 'sendForm')
+	{
+
+	#
 
 	}
 	
