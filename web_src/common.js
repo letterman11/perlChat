@@ -141,9 +141,9 @@ function loadRoomPane(rspObj)
 
 function deleteLoadRoomPane()
 {
-
 	deleteRoomPaneLogout();
 	loadRooms();
+	deleteMsgUserPane();
 	document.getElementById('logout_room_box').style.display = 'none';
 }
 
@@ -172,6 +172,7 @@ function deleteRoomPaneLogout()
 {
 	var stock_UserID = getCookie('stock_UserID');
 	var roomSelected = getCookie('roomSelected');
+
 	var roomSelDiv = document.getElementById('top_sel_con');
 	var postString;
 	
@@ -195,13 +196,13 @@ function deleteRoomPaneLogout()
 	 postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
 	 postString += "roomID=" + encodeURIComponent(roomSelected);
 
+	eraseCookie('roomSelected');
 
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
 		if(request.readyState == 4) {
 			if(request.status == 200) {
 				document.getElementById('logout_room_box').style.display = 'none';
-				eraseCookie('roomSelected');
 			} 
 			else	
 			{
@@ -249,6 +250,8 @@ function logIntoRoom()
 			if(request.status == 200) {
 				createCookie('roomSelected', roomDiv.firstChild.data);
 				setRoomPane(roomDiv.firstChild.data);
+				//alert(request.responseText);	
+				setMsgUserPane(request.responseText);	
 				//startAjaxPing(stock_UserID,roomDiv);	
 				
 			} 
@@ -289,6 +292,42 @@ function setRoomPane(roomDivText)
 	//Look into DOM structure of container for additional node
 	//--------------------------------------------------------	
 
+}
+
+function setMsgUserPane(rspObj)
+{
+
+	deleteMsgUserPane();
+
+        var userArray = eval (rspObj);
+	if (userArray == null || userArray == 'null' || userArray == undefined || userArray == 'undefined')
+		return;
+
+        var userPaneDiv = document.getElementById('bot_disp_con');
+
+
+        for(i=0;  i < userArray.length; i++)
+        {
+		if(userArray[i] == getCookie('stock_UserID'))
+			continue;
+                var newUserDiv = document.createElement("div");
+                var userTxtNode = document.createTextNode(userArray[i]);
+                newUserDiv.appendChild(userTxtNode);
+
+                newUserDiv.className = i % 2 ? ' userDiv1' : ' userDiv2';
+                userPaneDiv.appendChild(newUserDiv);
+        }
+
+}
+
+function deleteMsgUserPane()
+{
+        var userPaneDiv = document.getElementById('bot_disp_con');
+
+        while(userPaneDiv.hasChildNodes())
+        {
+                userPaneDiv.removeChild(userPaneDiv.firstChild);
+        }
 }
 
 function changePane(obj,pane)
@@ -471,17 +510,41 @@ function processForm(form)
 
 }
 
-function processSend(sendForm)
+function processSend(sendMsg)
 {
-	var i;
 	var request;
 	var postString = "";
-	var url = host + "/chatBox/cgi-bin/jax_server.cgi?req=sendForm";
-	var frmElements = sendForm.elements;
+	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
+	var frmElements = sendMsg.elements;
+        var stock_UserID = getCookie('stock_UserID');
+        var roomSelected = getCookie('roomSelected');
 
-	postString += encodeURIComponent(frmElements[0].name) + "=" + encodeURIComponent(frmElements[0].value);
+	postString  = "req=sendMsg&";
+	postString += encodeURIComponent(frmElements[0].name) + "=" + encodeURIComponent(frmElements[0].value) + "&";
+	postString += "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
+	postString  = postString.replace(/%20/g,"+");
 
-	alert("CONTENT " + frmElements[0].value);
+	alert(postString);
+/*
+        request = HTTP.newRequest();
+        request.onreadystatechange = function() {
+                if(request.readyState == 4) {
+                        if(request.status == 200) {
+
+                        }
+                        else
+                        {
+                                alert(request.statusText);
+                        }
+                }
+
+        };
+
+        request.open("POST", url);
+        request.setRequestHeader("Content-Type",
+                                        "application/x-www-form-urlencoded");
+        request.send(postString);
+*/
 
 }
 
