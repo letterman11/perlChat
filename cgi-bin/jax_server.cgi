@@ -62,7 +62,6 @@ if (ref $initSessionObject eq 'SessionObject')
 		else
 		{
 			#JSON creation of room IDs
-
 			my $js_room_array = " [ ";
 			my $i = 0;
 			$js_room_array .= "'" . @{$room_array}[$i]->[0] . "'";
@@ -167,7 +166,6 @@ if (ref $initSessionObject eq 'SessionObject')
 	}
 	elsif($query->param('req') eq 'roomLogout')
 	{
-
 		my $userID = $query->param('userID');
 		my $roomID = $query->param('roomID');
 
@@ -198,10 +196,88 @@ if (ref $initSessionObject eq 'SessionObject')
 		}
 
 	}
-	elsif($query->param('req') eq 'sendForm')
+	elsif($query->param('req') eq 'sendMsg')
 	{
+		my $userID = $query->param('userID');
+		my $roomID = $query->param('roomID');
+		my $msgText = $query->param('msgText');	
+		my @error_queue = ();
 
-	#
+		$sqlstr = "select user_id from user_cr where room_id = '$roomID'";		
+
+		carp("SELECT $sqlstr");
+
+		eval {
+			$sth = $dbh->prepare($sqlstr);
+				
+			$sth->execute();
+		
+			$msg_user_array = $sth->fetchall_arrayref;	
+
+			$sth->finish();
+		
+		};
+
+		if($@) 
+		{
+			print $query->header(-status=>'452 Application Error'
+						);	
+		}
+		else
+		{
+
+			for my $msg_user_id (@{$msg_user_array})
+			{
+
+				eval {
+
+					$sqlstr2 = "insert into chat_room_queue (user_id, room_id, insert_ts, chat_text, msg_user_id) "
+						 . "values ( '$userID', '$roomID', NOW(), " . $dbh->quote($msgText) . ","
+						 . "'" . $msg_user_id->[0] . "' )";
+  
+					$sth = $dbh->prepare($sqlstr2);
+				
+					$sth->execute();
+		
+					$sth->finish();
+
+				};
+
+				if($@) 
+				{
+	
+					push @error_queue, $msg_user_id->[0];	
+				}
+				
+				carp("INSERT $sqlstr2");
+				carp("DB ERROR: $@\n") if ($@);
+			}
+
+			$dbh->disconnect();
+
+			if(scalar(@error_queue) == scalar(@{$msg_user_array}))
+			{
+				print $query->header(-status=>'452 Application Error: All MSG Failed'
+							);
+			}
+			elsif(scalar(@error_queue) == 0)
+			{
+				print $query->header(-status=>'200 OK'
+					);
+			}
+			else
+			{
+				print $query->header(-status=>'200 OK'
+					);
+
+				print "MSG Failed for \n";
+
+				for my $user_id (@error_queue)
+				{
+					print "$user_id \n";
+				}
+			}
+		}
 
 	}
 	
