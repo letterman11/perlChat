@@ -1,3 +1,5 @@
+var jaxPingIntervalTime = 1000;
+var jaxPingCancelID;
 
 var HTTP = {};
 
@@ -35,3 +37,45 @@ HTTP.newRequest = function() {
 	HTTP._factory();
 }
 
+function startAjaxPing(userID,roomID)
+{
+	var postString;
+	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
+
+	postString = "req=ajaxPing" 
+	postString += "&userID=" + encodeURIComponent(userID) + "&" + "roomID=" + encodeURIComponent(roomID);
+		
+	jaxPingCancelID = setInverval(JaxPingServerForData(url,postString), jaxPingIntervalTime);
+
+
+}
+
+function JaxPingServerForData(urlArg,postrArg)
+{
+
+	var url = urlArg;
+	var postString = postrArg;
+
+	request = HTTP.newRequest();		
+	request.onreadystatechange = function() {
+		if(request.readyState == 4) {
+			if(request.status == 200) {
+				setChatPane(request.responseText);
+			} 
+			else	
+			{
+				alert(request.statusText);
+			}
+		}
+
+
+	};
+
+	request.open("POST", url);
+	request.setRequestHeader("Content-Type",
+					"application/x-www-form-urlencoded");
+
+	request.send(postString);
+
+
+}

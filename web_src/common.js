@@ -192,11 +192,14 @@ function deleteRoomPaneLogout()
 
 	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
 
-	 postString  = "req=roomLogout&";
-	 postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
-	 postString += "roomID=" + encodeURIComponent(roomSelected);
+	postString  = "req=roomLogout&";
+	postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
+	postString += "roomID=" + encodeURIComponent(roomSelected);
 
 	eraseCookie('roomSelected');
+
+	if(jaxPingCancelID) 
+		clearInterval(jaxPingCancelID);
 
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
@@ -252,7 +255,7 @@ function logIntoRoom()
 				setRoomPane(roomDiv.firstChild.data);
 				//alert(request.responseText);	
 				setMsgUserPane(request.responseText);	
-				//startAjaxPing(stock_UserID,roomDiv);	
+				//startAjaxPing(stock_UserID,roomDiv.firstChild.data);	
 				
 			} 
 			else	
@@ -329,6 +332,14 @@ function deleteMsgUserPane()
                 userPaneDiv.removeChild(userPaneDiv.firstChild);
         }
 }
+
+function setChatPane(rspObj)
+{
+
+
+
+}
+
 
 function changePane(obj,pane)
 {
@@ -525,12 +536,14 @@ function processSend(sendMsg)
 	postString  = postString.replace(/%20/g,"+");
 
 	alert(postString);
-/*
+	if (roomSelected == null || roomSelected == 'null')
+		return;
+
         request = HTTP.newRequest();
         request.onreadystatechange = function() {
                 if(request.readyState == 4) {
                         if(request.status == 200) {
-
+				frmElements[0].value = "";	
                         }
                         else
                         {
@@ -544,7 +557,6 @@ function processSend(sendMsg)
         request.setRequestHeader("Content-Type",
                                         "application/x-www-form-urlencoded");
         request.send(postString);
-*/
 
 }
 

@@ -219,8 +219,19 @@ body {
 	background-color:#919191;
 }
 
+.roomDiv1:hover {
+	background-color:#cfcfcf;
+
+}
+
 .roomDiv2 {
 	background-color:#787878;
+
+}
+
+.roomDiv2:hover {
+	background-color:#cfcfcf;
+
 }
 	
 #bot_disp_con {
