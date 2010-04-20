@@ -197,6 +197,7 @@ function deleteRoomPaneLogout()
 	postString += "roomID=" + encodeURIComponent(roomSelected);
 
 	eraseCookie('roomSelected');
+	deleteChatPane();
 
 	if(jaxPingCancelID) 
 		clearInterval(jaxPingCancelID);
@@ -253,7 +254,7 @@ function logIntoRoom()
 			if(request.status == 200) {
 				createCookie('roomSelected', roomDiv.firstChild.data);
 				setRoomPane(roomDiv.firstChild.data);
-				alert("request_response: " + request.responseText);	
+				//alert("request_response: " + request.responseText);	
 				setMsgUserPane(request.responseText);	
 				startAjaxPing(stock_UserID,roomDiv.firstChild.data);	
 				
@@ -337,6 +338,7 @@ function setChatPane(rspObj)
 {
 
 	var chatPaneDiv = document.getElementById('chat_panel');
+
 	var jSonCO = eval(rspObj);
 
 	if (jSonCO == null || jSonCO == 'null' || jSonCO == undefined || jSonCO == 'undefined')
@@ -345,14 +347,31 @@ function setChatPane(rspObj)
 	for(i=0; i < jSonCO.messages.length; i++)
 	{
 		var newChatMsgDiv = document.createElement("div");
-
-		var msgStr = jSonCO.messages[i].user_id + ": \n"
-			+ jSonCO.messages[i].msg_text; 	
+		var newSpan = document.createElement("span");
+		newSpan.style.fontWeight = "bold";
+		var userSpanTxtNode = document.createTextNode(jSonCO.messages[i].user_id + ": ");
+		newSpan.appendChild(userSpanTxtNode);
+		var msgStr = jSonCO.messages[i].msg_text; 	
 		var userTxtNode = document.createTextNode(msgStr);
+		newChatMsgDiv.appendChild(newSpan);
 		newChatMsgDiv.appendChild(userTxtNode);
+
+		newChatMsgDiv.className = chatPaneDiv.childNodes.length % 2 ? ' chatMsgDiv1' : ' chatMsgDiv2'; 
+
 		chatPaneDiv.appendChild(newChatMsgDiv);
 	}
+	newChatMsgDiv.scrollIntoView();	
 
+}
+
+function deleteChatPane()
+{
+	var chatPaneDiv = document.getElementById('chat_panel');
+	
+	while(chatPaneDiv.hasChildNodes())
+	{
+		chatPaneDiv.removeChild(chatPaneDiv.firstChild);
+	}
 }
 
 
@@ -513,13 +532,13 @@ function processForm(form)
 	request.onreadystatechange = function() {
 		if(request.readyState == 4) {
 			if(request.status == 200) {
-				document.getElementById("reg_response").innerHTML = "<span style='background-color:blue;'> <h3>" + request.statusText + " </h3> </span>";
+				document.getElementById("reg_response").innerHTML = "<h3>" + request.responseText + " </h3> ";
 			//	setTimeout('changePane(document,null)',5000);	
 
 			} 
 			else	
 			{
-				document.getElementById("reg_response").innerHTML = "<span style='background-color:red;'> <h3>" + request.statusText + " </h3> </span>";
+				document.getElementById("reg_response").innerHTML = " <h3>" + request.statusText + " </h3> ";
 
 			} 
 
@@ -550,7 +569,7 @@ function processSend(sendMsg)
 	postString += "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
 	postString  = postString.replace(/%20/g,"+");
 
-	alert(postString);
+	//alert(postString);
 	if (roomSelected == null || roomSelected == 'null')
 		return;
 
