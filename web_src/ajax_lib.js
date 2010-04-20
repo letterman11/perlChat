@@ -46,8 +46,6 @@ function startAjaxPing(userID,roomID)
 	jaxPingPostString += "&userID=" + encodeURIComponent(userID) + "&" + "roomID=" + encodeURIComponent(roomID);
 		
 	jaxPingCancelID = setInterval(JaxPingServerForData, jaxPingIntervalTime);
-	alert("jaxIntervalID " + jaxPingCancelID);	
-
 
 }
 
