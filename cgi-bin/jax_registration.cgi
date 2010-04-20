@@ -63,6 +63,7 @@ if (ref $callObj eq 'Error') {
 	{
 		print $query->header(-status=>'200 Registration Successful'
 					);
+		print "Registration Successful for " . $sqlHash->{userName};
 	}
 
 }

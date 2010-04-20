@@ -135,7 +135,7 @@ if (ref $initSessionObject eq 'SessionObject')
 						 . "  { "
 						 . "		user_id : '" . @{$msg_queue_array}[$i]->[$user_id]	. "', \n"
 						 . "		room_id : '" . @{$msg_queue_array}[$i]->[$room_id] 	. "', \n"
-						 . "		msg_text : '" . @{$msg_queue_array}[$i]->[$msg_text]	. "', \n"
+						 . "		msg_text : \"" . @{$msg_queue_array}[$i]->[$msg_text]	. "\", \n"
 						 . "		msg_q_id : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", \n"
 						 . "		time_stamp : '" . @{$msg_queue_array}[$i]->[$time_stamp]	. "' \n"
 						 . " } " ;
@@ -146,13 +146,13 @@ if (ref $initSessionObject eq 'SessionObject')
 						 . ",\n { "
 						 . "		user_id : '" . @{$msg_queue_array}[$i]->[$user_id]	. "', \n"
 						 . "		room_id : '" . @{$msg_queue_array}[$i]->[$room_id] 	. "', \n"
-						 . "		msg_text : '" . @{$msg_queue_array}[$i]->[$msg_text]	. "', \n"
+						 . "		msg_text : \"" . @{$msg_queue_array}[$i]->[$msg_text]	. "\", \n"
 						 . "		msg_q_id : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", \n"
 						 . "		time_stamp : '" . @{$msg_queue_array}[$i]->[$time_stamp]	. "' \n"
 						 . " } \n" ;
 					}
 					
-					$json_co .= " ], ";
+					$json_co .= " ] ";
 
 					my $js_msg_user_array = ();
 					
@@ -171,8 +171,8 @@ if (ref $initSessionObject eq 'SessionObject')
 							 $js_msg_user_array .= " ] ";
 						}
 					
-					$json_co .= "\n $js_msg_user_array "
-						 .  " \n}; ";
+					$json_co .= ", \n $js_msg_user_array " if ($js_msg_user_array);
+					$json_co .= " \n}; ";
 
 					carp("JSON_CO object: " . $json_co);
 
