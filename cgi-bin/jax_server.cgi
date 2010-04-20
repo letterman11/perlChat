@@ -102,8 +102,91 @@ if (ref $initSessionObject eq 'SessionObject')
 		
 			if($@) 
 			{
-				print $query->header(-status=>'452 Application Error'
+
+				$sqlstr = " update user_cr set  "
+					. " user_id = '$userID', "
+					. " room_id = '$roomID', "
+					. " date_ts = NOW(), "
+					. " room_name =  '$roomID' "
+					. " where user_id = '$userID' ";
+
+				carp("UPDATE $sqlstr");
+
+				eval {
+					my $sth = $dbh->prepare($sqlstr);
+					
+					$sth->execute();
+	
+					$sth->finish();
+	
+				};
+				
+				carp ("DB ERROR: $@ ") if ($@);		
+
+				if($@) 
+				{
+					print $query->header(-status=>'452 Application Error2'
 							);	
+				}
+				else		
+				{
+	
+					$sqlstr2 = "select user_id from user_cr where room_id = '$roomID'";		
+	
+					carp("SELECT $sqlstr2");
+			
+						eval {
+							$sth = $dbh->prepare($sqlstr2);
+							
+							$sth->execute();
+			
+							$msg_user_array = $sth->fetchall_arrayref;	
+	
+							$sth->finish();
+			
+							$dbh->disconnect();
+			
+						};
+					
+						if($@) 
+						{
+							print $query->header(-status=>'452 Application Error2'
+								);	
+						}
+						else
+						{	
+	
+							if (scalar(@{$msg_user_array}) > 1) 
+							{
+	
+								my $js_msg_user_array = " [ ";
+								my $i = 0;
+	
+								$js_msg_user_array .= "'" . @{$msg_user_array}[$i]->[0] . "'"; 
+					
+								for(++$i; $i < scalar(@{$msg_user_array}); $i++) 
+								{
+									$js_msg_user_array .=  ", '" . @{$msg_user_array}[$i]->[0] ."'";
+								}
+			
+								 $js_msg_user_array .= " ]; ";
+		
+								print $query->header(-status=>'200 OK',
+							     				-Content_Type=>'text/javascript'
+									);
+								
+								print $js_msg_user_array;
+		
+							}
+							else
+							{
+								print $query->header(-status=>'200 OK'
+											);
+							}
+	
+						}
+				}
+	
 			}
 			else
 			{
