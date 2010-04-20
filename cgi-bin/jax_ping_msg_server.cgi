@@ -4,7 +4,7 @@ use strict;
 use lib "/home/abrooks/www/chatterBox/script_src";
 use Util;
 use DbConfig;
-use CGI qw /:standard/;
+use CGI qw (:standard -debug);
 use CGI::Cookie;
 use CGI::Carp;
 use CGI::Carp qw(fatalsToBrowser);
@@ -40,12 +40,12 @@ if (ref $initSessionObject eq 'SessionObject')
 
 	my $userID = $query->param('userID');
 	my $roomID = $query->param('roomID');
-
+	
 	if($query->param('req') eq 'ajaxPing')
 	{
 		my @user_cr_row = ();
 
-		$sqlstr = "select * from user_cr where user_id = $userID";
+		$sqlstr = "select * from user_cr where user_id = '$userID'";
 		$sqlstr2 = "select user_id from user_cr where room_id = '$roomID'";		
 
 		eval {		
@@ -61,19 +61,23 @@ if (ref $initSessionObject eq 'SessionObject')
 			$sth->finish();
 		
 		};	
+		
+		carp("ping server - DB ERROR " . $@) if ($@);
 
 		if($@) 
 		{
-			print $query->header(-status=>'452 Application Error'
+			print $query->header(-status=>'1001 Application Error: Failed on combo select user_cr'
 						);	
 		}
 		else
 		{
 			$sqlstr2 = "select * from chat_room_queue "
-				 . " where msg_user_id = $userID "
-				 . " and insert_ts >= $user_cr_row[2] "
+				 . " where msg_user_id = '$userID' "
+				 . " and insert_ts >= '$user_cr_row[2]' "
 				 . " order by cr_queue_id desc limit 2 ";
 			
+			carp("SELECT CHAT TBL " . $sqlstr2);	
+
 			eval {		
 	
 				my $sth = $dbh->prepare($sqlstr2);
@@ -86,9 +90,11 @@ if (ref $initSessionObject eq 'SessionObject')
 	
 			};	
 				
+			carp("Chat Room arrary CNT: " . scalar(@{$msg_queue_array}));
+
 			if($@) 
 			{
-				print $query->header(-status=>'452 Application Error'
+				print $query->header(-status=>'1002 Application Error: Failed ChatRoom Select'
 							);	
 			}	
 			elsif(scalar(@{$msg_queue_array}) > 0)
@@ -98,57 +104,55 @@ if (ref $initSessionObject eq 'SessionObject')
 				
 				for(my $i=1; $i < scalar(@{$msg_queue_array}); $i++)
 				{
-					$sqlstr3 .= "or cr_queue_id = " . @{$msg_queue_array}[$i]->[0]; 
+					$sqlstr3 .= " or cr_queue_id = " . @{$msg_queue_array}[$i]->[0]; 
 
 				}				
 
+				carp("DELETE CHAT TBL " . $sqlstr3);	
+
 				eval {		
-		
 					my $sth = $dbh->prepare($sqlstr3);
 		
 					$sth->execute();
-		
-					$msg_queue_array = $sth->fetchall_arrayref;	
 		
 					$sth->finish();
 		
 				};	
 				
+				carp("ping server - DB ERROR " . $@) if ($@);
 				if($@)
 				{
-					print $query->header(-status=>'452 Application Error'
+					print $query->header(-status=>'1003 Application Error: Failed ChatRoom Delete'
 							);	
 				}
 				else
 				{
-
-
 					#all done return JSON_CO to client
 					my $json_co = ();
-					my ($msg_user_id,$room_id,$msg_text,$time_stamp,$msg_q_id) = (5,2,4,3,0);
+					my ($user_id,$msg_user_id,$room_id,$msg_text,$time_stamp,$msg_q_id) = (1,5,2,4,3,0);
 					my $i = 0;
-					$json_co = " json_var = { "
-						 . " msg0 : { "
-						 . "		user_id : " . @{$msg_queue_array}[$i]->[$msg_user_id]	. ", "
-						 . "		room_id : " . @{$msg_queue_array}[$i]->[$room_id] 	. ", "
-						 . "		msg_text : " . @{$msg_queue_array}[$i]->[$msg_text]	. ", "
-						 . "		msg_q_id : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", "
-						 . "		time_stamp : " . @{$msg_queue_array}[$i]->[$time_stamp]	. " "
+					$json_co = " json_var = { \n messages : [ \n"
+						 . "  { "
+						 . "		user_id : '" . @{$msg_queue_array}[$i]->[$user_id]	. "', \n"
+						 . "		room_id : '" . @{$msg_queue_array}[$i]->[$room_id] 	. "', \n"
+						 . "		msg_text : '" . @{$msg_queue_array}[$i]->[$msg_text]	. "', \n"
+						 . "		msg_q_id : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", \n"
+						 . "		time_stamp : '" . @{$msg_queue_array}[$i]->[$time_stamp]	. "' \n"
 						 . " } " ;
-					
 						
 					for(++$i; $i < scalar(@{$msg_queue_array}); $i++) 
 					{
 						$json_co .= " " 
-						 . ",\n msg$i : { "
-						 . "		user_id : " . @{$msg_queue_array}[$i]->[$msg_user_id]	. ", "
-						 . "		room_id : " . @{$msg_queue_array}[$i]->[$room_id] 	. ", "
-						 . "		msg_text : " . @{$msg_queue_array}[$i]->[$msg_text]	. ", "
-						 . "		msg_q_id : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", "
-						 . "		time_stamp : " . @{$msg_queue_array}[$i]->[$time_stamp]	. " "
+						 . ",\n { "
+						 . "		user_id : '" . @{$msg_queue_array}[$i]->[$user_id]	. "', \n"
+						 . "		room_id : '" . @{$msg_queue_array}[$i]->[$room_id] 	. "', \n"
+						 . "		msg_text : '" . @{$msg_queue_array}[$i]->[$msg_text]	. "', \n"
+						 . "		msg_q_id : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", \n"
+						 . "		time_stamp : '" . @{$msg_queue_array}[$i]->[$time_stamp]	. "' \n"
 						 . " } \n" ;
-
 					}
+					
+					$json_co .= " ], ";
 
 					my $js_msg_user_array = ();
 					
@@ -167,23 +171,26 @@ if (ref $initSessionObject eq 'SessionObject')
 							 $js_msg_user_array .= " ] ";
 						}
 					
-					$json_co .= ",\n $js_msg_user_array "
-						 .  " }; ";
+					$json_co .= "\n $js_msg_user_array "
+						 .  " \n}; ";
 
+					carp("JSON_CO object: " . $json_co);
 
 					print $query->header(-status=>'200 OK',
 								-Content_Type=>'text/javascript'
 								);
-
 					print $json_co;
-
 				}
 			}
-
+			else
+			{
+				print $query->header(-status=>'200 OK'
+						);
+			}
 
 		}
 	}
 
-
-
 }
+
+exit;
