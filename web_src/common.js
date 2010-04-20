@@ -253,9 +253,9 @@ function logIntoRoom()
 			if(request.status == 200) {
 				createCookie('roomSelected', roomDiv.firstChild.data);
 				setRoomPane(roomDiv.firstChild.data);
-				//alert(request.responseText);	
+				alert("request_response: " + request.responseText);	
 				setMsgUserPane(request.responseText);	
-				//startAjaxPing(stock_UserID,roomDiv.firstChild.data);	
+				startAjaxPing(stock_UserID,roomDiv.firstChild.data);	
 				
 			} 
 			else	
@@ -336,7 +336,22 @@ function deleteMsgUserPane()
 function setChatPane(rspObj)
 {
 
+	var chatPaneDiv = document.getElementById('chat_panel');
+	var jSonCO = eval(rspObj);
 
+	if (jSonCO == null || jSonCO == 'null' || jSonCO == undefined || jSonCO == 'undefined')
+		return;
+
+	for(i=0; i < jSonCO.messages.length; i++)
+	{
+		var newChatMsgDiv = document.createElement("div");
+
+		var msgStr = jSonCO.messages[i].user_id + ": \n"
+			+ jSonCO.messages[i].msg_text; 	
+		var userTxtNode = document.createTextNode(msgStr);
+		newChatMsgDiv.appendChild(userTxtNode);
+		chatPaneDiv.appendChild(newChatMsgDiv);
+	}
 
 }
 
