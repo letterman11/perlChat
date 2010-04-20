@@ -1,5 +1,7 @@
-var jaxPingIntervalTime = 1000;
+var jaxPingIntervalTime = 3000;
 var jaxPingCancelID;
+var jaxPingUrl;
+var jaxPingPostString;
 
 var HTTP = {};
 
@@ -39,22 +41,18 @@ HTTP.newRequest = function() {
 
 function startAjaxPing(userID,roomID)
 {
-	var postString;
-	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
-
-	postString = "req=ajaxPing" 
-	postString += "&userID=" + encodeURIComponent(userID) + "&" + "roomID=" + encodeURIComponent(roomID);
+	jaxPingUrl = host + "/chatBox/cgi-bin/jax_ping_msg_server.cgi";
+	jaxPingPostString = "req=ajaxPing" 
+	jaxPingPostString += "&userID=" + encodeURIComponent(userID) + "&" + "roomID=" + encodeURIComponent(roomID);
 		
-	jaxPingCancelID = setInverval(JaxPingServerForData(url,postString), jaxPingIntervalTime);
+	jaxPingCancelID = setInterval(JaxPingServerForData, jaxPingIntervalTime);
+	alert("jaxIntervalID " + jaxPingCancelID);	
 
 
 }
 
-function JaxPingServerForData(urlArg,postrArg)
+function JaxPingServerForData(urlArg,postArg)
 {
-
-	var url = urlArg;
-	var postString = postrArg;
 
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
@@ -71,11 +69,11 @@ function JaxPingServerForData(urlArg,postrArg)
 
 	};
 
-	request.open("POST", url);
+	request.open("POST", jaxPingUrl);
 	request.setRequestHeader("Content-Type",
 					"application/x-www-form-urlencoded");
 
-	request.send(postString);
+	request.send(jaxPingPostString);
 
 
 }
