@@ -429,8 +429,7 @@ function displayLoggedOn()
 	stock_UserID = getCookie('stock_UserID');
 	var spanLoggedOn = document.getElementById('form_login');
 	spanLoggedOn.innerHTML = stock_UserID + " LOGGED IN | " +
-	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> " +
-	" | <a href=\"/cgi-bin/profile_page.cgi?userName=" + stock_UserID + "\">" +  " update profile </a> ";
+	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> ";
 
 }
 
