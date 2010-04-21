@@ -57,6 +57,7 @@ function JaxPingServerForData(urlArg,postArg)
 		if(request.readyState == 4) {
 			if(request.status == 200) {
 				setChatPane(request.responseText);
+				setMsgUserPane(request.responseText);
 			} 
 			else	
 			{
