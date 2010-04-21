@@ -147,6 +147,17 @@ function deleteLoadRoomPane()
 	document.getElementById('logout_room_box').style.display = 'none';
 }
 
+function finalLogout()
+{
+	var sessID = getCookie('stock_SessionID');
+	if(sessID == null || sessID == 'null' || sessID == undefined || sessID == 'undefined')
+	  return;
+
+	deleteRoomPaneLogout();
+	deleteMsgUserPane();
+	document.getElementById('logout_room_box').style.display = 'none';
+}
+
 function deleteRoomPane()
 {
 	var roomSelDiv = document.getElementById('top_sel_con');
@@ -303,19 +314,24 @@ function setMsgUserPane(rspObj)
 
 	deleteMsgUserPane();
 
-        var userArray = eval (rspObj);
-	if (userArray == null || userArray == 'null' || userArray == undefined || userArray == 'undefined')
+        var jSonCO = eval (rspObj);
+
+	if (jSonCO == null || jSonCO == 'null' || jSonCO == undefined || jSonCO == 'undefined')
+		return;
+	if (jSonCO.msg_user_ids == null || jSonCO.msg_user_ids == 'null' || jSonCO.msg_user_ids == undefined || jSonCO.msg_user_ids == 'undefined')
 		return;
 
         var userPaneDiv = document.getElementById('bot_disp_con');
 
+	var stockID = getCookie('stock_UserID');
 
-        for(i=0;  i < userArray.length; i++)
+
+        for(i=0;  i < jSonCO.msg_user_ids.length; i++)
         {
-		if(userArray[i] == getCookie('stock_UserID'))
+		if(jSonCO.msg_user_ids[i] == stockID)
 			continue;
                 var newUserDiv = document.createElement("div");
-                var userTxtNode = document.createTextNode(userArray[i]);
+                var userTxtNode = document.createTextNode(jSonCO.msg_user_ids[i]);
                 newUserDiv.appendChild(userTxtNode);
 
                 newUserDiv.className = i % 2 ? ' userDiv1' : ' userDiv2';
@@ -338,10 +354,11 @@ function setChatPane(rspObj)
 {
 
 	var chatPaneDiv = document.getElementById('chat_panel');
-
 	var jSonCO = eval(rspObj);
 
 	if (jSonCO == null || jSonCO == 'null' || jSonCO == undefined || jSonCO == 'undefined')
+		return;
+	if (jSonCO.messages == null || jSonCO.messages == 'null' || jSonCO.messages == undefined || jSonCO.messages == 'undefined')
 		return;
 
 	for(i=0; i < jSonCO.messages.length; i++)
@@ -361,7 +378,6 @@ function setChatPane(rspObj)
 		chatPaneDiv.appendChild(newChatMsgDiv);
 	}
 	newChatMsgDiv.scrollIntoView();	
-
 }
 
 function deleteChatPane()
