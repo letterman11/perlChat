@@ -75,8 +75,6 @@ if (ref $initSessionObject eq 'SessionObject')
 				 . " where msg_user_id = '$userID' "
 				 . " and insert_ts >= '$user_cr_row[2]' "
 				 . " order by cr_queue_id desc limit 2 ";
-			
-			carp("SELECT CHAT TBL " . $sqlstr2);	
 
 			eval {		
 	
@@ -89,9 +87,9 @@ if (ref $initSessionObject eq 'SessionObject')
 				$sth->finish();
 	
 			};	
-				
-			carp("Chat Room arrary CNT: " . scalar(@{$msg_queue_array}));
 
+			carp("ping server - DB ERROR " . $@) if ($@);
+				
 			if($@) 
 			{
 				print $query->header(-status=>'1002 Application Error: Failed ChatRoom Select'
@@ -181,6 +179,38 @@ if (ref $initSessionObject eq 'SessionObject')
 								);
 					print $json_co;
 				}
+			}
+			elsif(scalar(@{$msg_user_array}) > 1)
+			{
+
+				my $json_co = ();
+
+				my $js_msg_user_array = ();
+				
+				$json_co = " json_var = { ";
+									
+				$js_msg_user_array = " msg_user_ids : [ ";
+				my $i = 0;
+
+				$js_msg_user_array .= "'" . @{$msg_user_array}[$i]->[0] . "'"; 
+	
+				for(++$i; $i < scalar(@{$msg_user_array}); $i++) 
+				{
+					$js_msg_user_array .=  ", '" . @{$msg_user_array}[$i]->[0] ."'";
+				}
+	
+				$js_msg_user_array .= " ] ";
+				
+				$json_co .= "\n $js_msg_user_array " if ($js_msg_user_array);
+				$json_co .= " \n}; ";
+
+				carp("JSON_CO object: " . $json_co);
+
+				print $query->header(-status=>'200 OK',
+							-Content_Type=>'text/javascript'
+							);
+				print $json_co;
+
 			}
 			else
 			{
