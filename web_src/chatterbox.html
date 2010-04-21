@@ -7,7 +7,7 @@
 <script type="text/javascript" src="/chatBox/web_src/common.js"> </script> 
 <script type="text/javascript" src="/chatBox/web_src/ajax_lib.js"> </script> 
 </head>
-<body id="layout" onload="init()" onunload="deleteLoadRoomPane()">
+<body id="layout" onload="init()" onunload="finalLogout()">
   <div class="center_div">
      <div id="header">
 	<div id="banner">
@@ -42,8 +42,7 @@
              stock_UserID = getCookie('stock_UserID');
              if(stock_UserID != null && stock_UserID.length > 0) {
                 document.write(stock_UserID + " LOGGED IN | " +
-                " <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> " +
-                " | <a href=\"/cgi-bin/profile_page.cgi?userName=" + stock_UserID + "\">" +  " update profile </a> ");
+                " <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
              }
           </script>
          </span>
