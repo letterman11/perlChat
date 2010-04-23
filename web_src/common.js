@@ -266,7 +266,6 @@ function logIntoRoom()
 				createCookie('roomSelected', roomDiv.firstChild.data);
 				setRoomPane(roomDiv.firstChild.data);
 				//alert("request_response: " + request.responseText);	
-				setMsgUserPane(request.responseText);	
 				startAjaxPing(stock_UserID,roomDiv.firstChild.data);	
 				
 			} 
