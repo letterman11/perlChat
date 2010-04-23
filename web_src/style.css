@@ -27,7 +27,7 @@ body {
 /*	background-color:#00004b; */
 	background-color:black;
 	width:900px;
-	height:75px;
+	height:85px;
 	border:outset;
 }
 
@@ -86,6 +86,15 @@ body {
 
 .form_login a {
 	color:gray;
+	border:solid gray 1px; 
+	text-decoration:none; 
+	margin: 1px;
+	padding: 1px;
+}
+
+.form_login a:hover {
+	color:black;
+	background-color:gray;
 }
 
 .form_login .text_td { 
@@ -105,17 +114,6 @@ body {
 .form_login tr { 
 	margin:0;
 	padding:0;
-}
-
-.form_login #submit, .form_login #reset {
-/*	border:solid gray 1px; */
-	margin-left: 3px;
-}
-
-.form_login a #submit, .form_login a #reset  {
-	border:solid gray 1px;
-	margin-left: 3px;
-	text-decoration:none;
 }
 
 #err_text {
@@ -191,6 +189,7 @@ body {
 	border:solid gray 0.5pt;
 }
 
+
 #input_panel #sub_button h1 {
 	padding:5px;
 }
@@ -206,6 +205,11 @@ body {
 	float:left;
 	border:solid 1pt gray;
 	display:none;
+}
+
+.logout_room_box:hover {
+	color:black;
+	background-color:gray;
 }
 
 .right_panel {
@@ -250,7 +254,7 @@ body {
 #bot_disp_con {
 	background-color:#8a9ad2;
 	background-color:#c9c9c9;
-	height:200px;
+	height:195px;
 	width:100px;
 	border:inset;
 }

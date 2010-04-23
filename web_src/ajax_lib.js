@@ -1,4 +1,4 @@
-var jaxPingIntervalTime = 3000;
+var jaxPingIntervalTime = 2000;
 var jaxPingCancelID;
 var jaxPingUrl;
 var jaxPingPostString;

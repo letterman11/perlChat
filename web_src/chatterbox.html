@@ -26,9 +26,9 @@
               </tr>
               <tr class="form_login text_td">
                 <!--  <td colspan="2"> <input type="submit" value="Submit"> <input type="reset">  -->
-                 <td colspan="2"> 
-			<a href="javascript:processSignInForm(document.frmLogin)"> <span id="submit">  SUBMIT  </span>  </a>
-			<a href="#"> <span id="reset">  RESET  </span>  </a> 
+                 <td colspan="2" style="margin:2px; padding:2px;"> 
+			<a href="javascript:processSignInForm(document.frmLogin)">  SUBMIT  </a>
+			<a href="javascript:clearSignInForm(document.frmLogin)"> RESET   </a> 
 		Not Registered?   Register <a href="#" onclick="changePane(document,PANE.REGISTRATION)"> here </a> 
 	         </td>
               </tr>
@@ -42,7 +42,7 @@
              stock_UserID = getCookie('stock_UserID');
              if(stock_UserID != null && stock_UserID.length > 0) {
                 document.write(stock_UserID + " LOGGED IN | " +
-                " <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
+                " <a href=\"javascript:changePane(document,PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
              }
           </script>
          </span>
@@ -62,7 +62,7 @@
 		</textarea>
 	     </form>
 	     <div id="sub_button">
-	       <a href="javascript:processSend(document.chatInput);"> <h1> SEND </h1> </a>
+	       <a href="javascript:processSend(document.chatInput);" onclick="but_on(this);"> <h1> SEND </h1> </a>
 	     </div>
 	   </div>
        </div>
@@ -189,7 +189,7 @@
 	   <td class="form_register"> Password: </td> <td> <input name="password" type="password"> </td> <td class="val_error" id="val_password">Invalid password: minimum length 6 characters </td>
 	</tr>
 	<tr> <td> &nbsp; </td> <td> </td> </tr>
-	<tr> <td> <a href="javascript:processForm(document.frmRegister)"> <h2> SUBMIT </h2> </a> </td> <td class="val_error"> </td> </tr> 
+	<tr> <td> <a href="javascript:processForm(document.frmRegister)" onclick="but_on2(this);"> <h2 id="sub1"> SUBMIT </h2> </a> </td> <td class="val_error"> </td> </tr> 
 <!--	<tr> <td colspan="2"> <a href="javascript:popForm(document.frmRegister)"> <h2> POP </h2> </a> </td>  </tr>  -->
       </table>
     </form>
@@ -202,7 +202,10 @@
 <!--     Initial window for ChatBox application   -->
    <div class="landing_panel" id="landing_panel">
     <div class="inner_panel">
-	<h2> ChatBox is a Web 2.0 chat application that allows multiple parties to converse in the same chat room </h2>
+	<h2> ChatBox is a demo Web 2.0 chat application that allows multiple parties to converse in the same chat room. 
+		Registration can be accomplished through the DCQuery application as well as here.  Logging into one logs into all.
+		Logging out of one logs out of all.
+	</h2>
     </div>
    </div>
 <!-- end panel -->

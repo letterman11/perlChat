@@ -428,7 +428,7 @@ function displayLoggedOn()
 	stock_UserID = getCookie('stock_UserID');
 	var spanLoggedOn = document.getElementById('form_login');
 	spanLoggedOn.innerHTML = stock_UserID + " LOGGED IN | " +
-	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> ";
+	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> ";
 
 }
 
@@ -522,6 +522,11 @@ function processSignInForm(form)
 
 }
 
+function clearSignInForm(form)
+{
+	form.userName.value = "";
+	form.userPass.value = "";
+}
 
 function processForm(form)
 {
@@ -608,6 +613,32 @@ function processSend(sendMsg)
 
 }
 
+function but_on(obj)
+{
+	var butDiv = document.getElementById('sub_button');	
+	obj.style.color = 'black';
+	butDiv.style.backgroundColor = 'gray';
+	setTimeout(but_off,200);
+	function but_off() 
+	{
+		butDiv.style.backgroundColor = 'black'	
+		obj.style.color = 'gray';
+	}
+}
+
+function but_on2(obj)
+{
+	butH2 = document.getElementById('sub1');
+	butH2.style.backgroundColor = 'gray';
+	butH2.style.color = 'black';
+	setTimeout(but_off2,200);
+	function but_off2() 
+	{
+		butH2.style.backgroundColor = 'black';
+		butH2.style.color = 'gray';
+	}
+}
+
 function popForm(form) 
 {
 	form.firstName.value = "John";
@@ -624,5 +655,4 @@ function popForm(form)
 
 
 }
-
 
