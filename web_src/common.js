@@ -52,6 +52,7 @@ function eraseCookie(name)
 function logOut()
 {
 	deleteRoomPaneLogout();	
+	deleteMsgUserPane();
 	document.getElementById('logout_room_box').style.display = 'none';
 
 	for(i=0; i<arguments.length; i++) {
@@ -88,25 +89,8 @@ function loadRooms()
 {
 
 	var url = host + "/chatBox/cgi-bin/jax_server.cgi?req=roomIDs";
-	request = HTTP.newRequest();		
-	request.onreadystatechange = function() {
-		if(request.readyState == 4) {
-			if(request.status == 200) {
-			
-				loadRoomPane(request.responseText);
-			} 
-			else	
-			{
-				alert(request.statusText);
-				document.getElementById('top_sel_con').innerHTML = request.statusText;	
-			}
-		}
 
-
-	};
-
-	request.open("GET", url);
-	request.send(null);
+	Jax_Call_Get(url, function() { loadRoomPane(request.responseText); }, errStatus, true); 
 
 }
 
@@ -213,32 +197,13 @@ function deleteRoomPaneLogout()
 	if(jaxPingCancelID) 
 		clearInterval(jaxPingCancelID);
 
-	request = HTTP.newRequest();		
-	request.onreadystatechange = function() {
-		if(request.readyState == 4) {
-			if(request.status == 200) {
-				document.getElementById('logout_room_box').style.display = 'none';
-			} 
-			else	
-			{
-				alert(request.statusText);
-			}
-		}
-
-
-	};
-
-	request.open("POST", url, false);
-	request.setRequestHeader("Content-Type",
-					"application/x-www-form-urlencoded");
-	request.send(postString);
+	Jax_Call_Post(url, postString, function() { document.getElementById('logout_room_box').style.display = 'none'; }, errStatus, false); 
 
 
 }
 
 function logIntoRoom()
 {
-
 	var roomDiv;
 	var stock_UserID = getCookie('stock_UserID');
 
@@ -258,32 +223,14 @@ function logIntoRoom()
          postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
          postString += "roomID=" + encodeURIComponent(roomDiv.firstChild.data);
 
-
-	request = HTTP.newRequest();		
-	request.onreadystatechange = function() {
-		if(request.readyState == 4) {
-			if(request.status == 200) {
+	Jax_Call_Post(url, postString, 
+			function() {  
 				createCookie('roomSelected', roomDiv.firstChild.data);
 				setRoomPane(roomDiv.firstChild.data);
-				//alert("request_response: " + request.responseText);	
 				startAjaxPing(stock_UserID,roomDiv.firstChild.data);	
-				
-			} 
-			else	
-			{
-				alert(request.statusText);
-			}
-		}
-
-
-	};
-
-	request.open("POST", url);
-	request.setRequestHeader("Content-Type",
-					"application/x-www-form-urlencoded");
-	request.send(postString);
-
-
+			}, 
+			errStatus, 
+			true); 
 
 }
 
@@ -494,31 +441,10 @@ function processSignInForm(form)
 	postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value);
 	postString = postString.replace(/%20/g,"+");	
 
-	request = HTTP.newRequest();		
-	request.onreadystatechange = function() {
-		if(request.readyState == 4) {
-			if(request.status == 200) 
-			{
-				setTimeout('changePane(document,null)',1000);	
-
-			} 
-			else	
-			{
-				document.getElementById("err_text").innerHTML =  request.statusText; 
-
-			} 
-
-
-		}	
-
-
-	};
-
-	request.open("POST", url);
-	request.setRequestHeader("Content-Type",
-					"application/x-www-form-urlencoded");
-
-	request.send(postString);
+	Jax_Call_Post(url, postString, 
+				function() {  setTimeout('changePane(document,null)',1000); },  
+				function() {  document.getElementById("err_text").innerHTML =  jaxResponseStatusText; }, 
+				 true); 
 
 }
 
@@ -547,30 +473,12 @@ function processForm(form)
 	postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value);
 	postString = postString.replace(/%20/g,"+");	
 
-	request = HTTP.newRequest();		
-	request.onreadystatechange = function() {
-		if(request.readyState == 4) {
-			if(request.status == 200) {
-				document.getElementById("reg_response").innerHTML = "<h3>" + request.responseText + " </h3> ";
-			//	setTimeout('changePane(document,null)',5000);	
-
-			} 
-			else	
-			{
-				document.getElementById("reg_response").innerHTML = " <h3>" + request.statusText + " </h3> ";
-
-			} 
 
 
-		}	
-
-
-	};
-
-	request.open("POST", url);
-	request.setRequestHeader("Content-Type",
-					"application/x-www-form-urlencoded");
-	request.send(postString);
+	Jax_Call_Post(url, postString, 
+					function() {  document.getElementById("reg_response").innerHTML = "<h3>" + jaxResponseText + " </h3> "; }, 
+					function() { document.getElementById("reg_response").innerHTML = " <h3>" + jaxResponseStatusText + " </h3> "; },
+					true); 
 
 }
 
@@ -592,24 +500,8 @@ function processSend(sendMsg)
 	if (roomSelected == null || roomSelected == 'null')
 		return;
 
-        request = HTTP.newRequest();
-        request.onreadystatechange = function() {
-                if(request.readyState == 4) {
-                        if(request.status == 200) {
-				frmElements[0].value = "";	
-                        }
-                        else
-                        {
-                                alert(request.statusText);
-                        }
-                }
+	Jax_Call_Post(url, postString, function() { document.chatInput.msgText.value = ""; }, errStatus, true); 
 
-        };
-
-        request.open("POST", url);
-        request.setRequestHeader("Content-Type",
-                                        "application/x-www-form-urlencoded");
-        request.send(postString);
 
 }
 
@@ -639,20 +531,7 @@ function but_on2(obj)
 	}
 }
 
-function popForm(form) 
+function errStatus()
 {
-	form.firstName.value = "John";
-	form.lastName.value = "Blake";
-	form.address1.value = "33 Kingston Drive";
-	form.address2.value = "Suite 11A";
-	form.zipcode.value = "23215";
-	form.city.value = "Phoenix";
-	form.state.value = "AZ";
-	form.phone.value = "4578901234";
-	form.email.value = "johnb@yahoo.com";
-	form.userName.value = "johnblake";
-	form.password.value = "johnblake";
-
-
+	alert(request.statusText);
 }
-

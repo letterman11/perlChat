@@ -3,6 +3,9 @@ var jaxPingCancelID;
 var jaxPingUrl;
 var jaxPingPostString;
 
+var jaxResponseText;
+var jaxResponseStatusText;
+
 var HTTP = {};
 
 HTTP._factories = [
@@ -76,3 +79,52 @@ function JaxPingServerForData(urlArg,postArg)
 
 
 }
+
+function Jax_Call_Post(url, data, func, errfunc, async)
+{
+        request = HTTP.newRequest();
+        request.onreadystatechange = function() {
+                if(request.readyState == 4) {
+                        if(request.status == 200) {
+				
+				jaxResponseText = request.responseText;
+				func();
+                        }
+                        else
+                        {
+				jaxResponseStatusText = request.statusText;
+				errfunc();
+                        }
+                }
+
+        };
+
+        request.open("POST", url, async);
+        request.setRequestHeader("Content-Type",
+                                        "application/x-www-form-urlencoded");
+        request.send(data);
+
+}
+
+function Jax_Call_Get(url, func, errfunc, async)
+{
+        request = HTTP.newRequest();
+        request.onreadystatechange = function() {
+                if(request.readyState == 4) {
+                        if(request.status == 200) {
+				
+				func();
+                        }
+                        else
+                        {
+				errfunc();
+                        }
+                }
+
+        };
+
+        request.open("GET", url, async);
+        request.send(null);
+
+}
+
