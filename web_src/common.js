@@ -500,7 +500,10 @@ function processSend(sendMsg)
 	if (roomSelected == null || roomSelected == 'null')
 		return;
 
-	Jax_Call_Post(url, postString, function() { document.chatInput.msgText.value = ""; }, errStatus, true); 
+
+	but_on();
+	document.chatInput.msgText.value = "";
+	Jax_Call_Post(url, postString, function() { }, errStatus, true); 
 
 
 }
@@ -508,13 +511,16 @@ function processSend(sendMsg)
 function but_on(obj)
 {
 	var butDiv = document.getElementById('sub_button');	
-	obj.style.color = 'black';
 	butDiv.style.backgroundColor = 'gray';
-	setTimeout(but_off,200);
+	butDiv.getElementsByTagName("h1")[0].style.color = 'black';
+
+
+	butDiv.style.color = 'black';
+	setTimeout(but_off,100);
 	function but_off() 
 	{
 		butDiv.style.backgroundColor = 'black'	
-		obj.style.color = 'gray';
+		butDiv.getElementsByTagName("h1")[0].style.color = 'gray';
 	}
 }
 
@@ -535,3 +541,4 @@ function errStatus()
 {
 	alert(request.statusText);
 }
+
