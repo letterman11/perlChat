@@ -5,15 +5,17 @@
 <title> ChatterBox application </title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 <script type="text/javascript" src="/chatBox/web_src/common.js"> </script> 
+<script type="text/javascript" src="/chatBox/web_src/Cookie.js"> </script> 
 <script type="text/javascript" src="/chatBox/web_src/ajax_lib.js"> </script> 
+<script type="text/javascript" src="/chatBox/web_src/Pane.js"> </script> 
 </head>
-<body id="layout" onload="init()" onunload="finalLogout()">
+<body id="layout" onload="App.initialize()" onunload="App.suspend()">
   <div class="center_div">
      <div id="header">
 	<div id="banner">
 	<!--  <a href="http://192.168.0.197:8080/chatBox/web_src/chatterbox.html"> <img id="banner_image" src="/chatBox/gen_rsrc/DCCHAT_159_30.jpg">  </a> -->
-	  <a href="http://192.168.0.197:8080/chatBox/web_src/chatterbox.html"> <img id="banner_image" src="/chatBox/gen_rsrc/CHAT_BOX_199_26.jpg">  </a> 
-	  <a href="http://192.168.0.197:8080/dcoda.net/index.html"> <img id="banner_image2" src="/chatBox/gen_rsrc/INVERT_DCBANNER_CROP2_219_31_2.jpg">  </a> 
+	  <a href="http://192.168.0.197:8081/chatBox/web_src/chatterbox.html"> <img id="banner_image" src="/chatBox/gen_rsrc/CHAT_BOX_199_26.jpg">  </a> 
+	  <a href="http://192.168.0.197:8081/index.html"> <img id="banner_image2" src="/chatBox/gen_rsrc/INVERT_DCBANNER_CROP2_219_31_2.jpg">  </a> 
 	</div>
         <div id="login" style="display:block">
           <form name="frmLogin">
@@ -27,9 +29,9 @@
               <tr class="form_login text_td">
                 <!--  <td colspan="2"> <input type="submit" value="Submit"> <input type="reset">  -->
                  <td colspan="2" style="margin:2px; padding:2px;"> 
-			<a href="javascript:processSignInForm(document.frmLogin)">  SUBMIT  </a>
-			<a href="javascript:clearSignInForm(document.frmLogin)"> RESET   </a> 
-		Not Registered?   Register <a href="#" onclick="changePane(document,PANE.REGISTRATION)"> here </a> 
+			<a href="javascript:Utility.processSignInForm(document.frmLogin)">  SUBMIT  </a>
+			<a href="javascript:Utility.clearSignInForm(document.frmLogin)"> RESET   </a> 
+		Not Registered?   Register <a href="#" onclick="App.changePane(document,App.PANE.REGISTRATION)"> here </a> 
 	         </td>
               </tr>
               </table>
@@ -42,7 +44,7 @@
              stock_UserID = getCookie('stock_UserID');
              if(stock_UserID != null && stock_UserID.length > 0) {
                 document.write(stock_UserID + " LOGGED IN | " +
-                " <a href=\"javascript:changePane(document,PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
+                " <a href=\"javascript:App.changePane(document,App.PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"App.logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
              }
           </script>
          </span>
@@ -62,12 +64,12 @@
 		</textarea>
 	     </form>
 	     <div id="sub_button">
-	       <a href="javascript:processSend(document.chatInput);"> <h1> SEND </h1> </a>
+	       <a href="javascript:Utility.processSend(document.chatInput);"> <h1> SEND </h1> </a>
 	     </div>
 	   </div>
        </div>
        <div class="logout_room_box" id="logout_room_box">
-	<h6><a onclick="deleteLoadRoomPane()"> LOGOUT </a></h6>
+	<h6><a onclick="App.logOutRoomReload()"> LOGOUT </a></h6>
        </div>
        <div class="right_panel">
 	  <div class="right_top_panel">
@@ -189,7 +191,7 @@
 	   <td class="form_register"> Password: </td> <td> <input name="password" type="password"> </td> <td class="val_error" id="val_password">Invalid password: minimum length 6 characters </td>
 	</tr>
 	<tr> <td> &nbsp; </td> <td> </td> </tr>
-	<tr> <td> <a href="javascript:processForm(document.frmRegister)" onclick="but_on2(this);"> <h2 id="sub1"> SUBMIT </h2> </a> </td> <td class="val_error"> </td> </tr> 
+	<tr> <td> <a href="javascript:Utility.processRegForm(document.frmRegister)" onclick="Utility.but_on2(this);"> <h2 id="sub1"> SUBMIT </h2> </a> </td> <td class="val_error"> </td> </tr> 
 <!--	<tr> <td colspan="2"> <a href="javascript:popForm(document.frmRegister)"> <h2> POP </h2> </a> </td>  </tr>  -->
       </table>
     </form>
