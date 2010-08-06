@@ -1,11 +1,3 @@
-var jaxPingIntervalTime = 2000;
-var jaxPingCancelID;
-var jaxPingUrl;
-var jaxPingPostString;
-
-var jaxResponseText;
-var jaxResponseStatusText;
-
 var HTTP = {};
 
 HTTP._factories = [
@@ -42,25 +34,33 @@ HTTP.newRequest = function() {
 	HTTP._factory();
 }
 
-function startAjaxPing(userID,roomID)
-{
-	jaxPingUrl = host + "/chatBox/cgi-bin/jax_ping_msg_server.cgi";
-	jaxPingPostString = "req=ajaxPing" 
-	jaxPingPostString += "&userID=" + encodeURIComponent(userID) + "&" + "roomID=" + encodeURIComponent(roomID);
-		
-	jaxPingCancelID = setInterval(JaxPingServerForData, jaxPingIntervalTime);
+var Jax = {
 
-}
+    pingIntervalTime: 2000,
+    pingCancelID: null,
+    pingURL: "/cgi-bin/chatBox/cgi-bin/jax_ping_msg_server.cgi",
+    serverURL: "/cgi-bin/chatBox/cgi-bin/jax_server.cgi",
+    serverAuthURL: "/cgi-bin/chatBox/cgi-bin/jax_authenticate.cgi",
+    serverRegURL: "/cgi-bin/chatBox/cgi-bin/jax_registration.cgi",
+    pingPostString: null,
+    responseText: null,
+    responseStatusText: null,
 
-function JaxPingServerForData(urlArg,postArg)
-{
+    startAjaxPing: function(userID,roomID) {
+	this.pingPostString = "req=ajaxPing"; 
+	this.pingPostString += "&userID=" + encodeURIComponent(userID) + "&" + "roomID=" + encodeURIComponent(roomID);
+	this.pingCancelID = setInterval(Jax.pingServerForData, Jax.pingIntervalTime);
+
+    },
+
+    pingServerForData: function() {
 
 	request = HTTP.newRequest();		
 	request.onreadystatechange = function() {
 		if(request.readyState == 4) {
 			if(request.status == 200) {
-				setChatPane(request.responseText);
-				setMsgUserPane(request.responseText);
+				chatPane.setPane(request.responseText);
+				userPane.setPane(request.responseText);
 			} 
 			else	
 			{
@@ -71,28 +71,30 @@ function JaxPingServerForData(urlArg,postArg)
 
 	};
 
-	request.open("POST", jaxPingUrl);
+	request.open("POST", Jax.pingURL);
 	request.setRequestHeader("Content-Type",
 					"application/x-www-form-urlencoded");
 
-	request.send(jaxPingPostString);
+	request.send(Jax.pingPostString);
 
 
-}
+    },
 
-function Jax_Call_Post(url, data, func, errfunc, async)
-{
+    jaxCallPost: function(url,data,func,errfunc,async) {
+
         request = HTTP.newRequest();
         request.onreadystatechange = function() {
                 if(request.readyState == 4) {
                         if(request.status == 200) {
 				
-				jaxResponseText = request.responseText;
+				Jax.responseText = request.responseText;
+				//this.requestText = request.responseText;
 				func();
                         }
                         else
                         {
-				jaxResponseStatusText = request.statusText;
+				Jax.responseStatusText = request.statusText;
+				//this.responseStatusText = request.statusText;
 				errfunc();
                         }
                 }
@@ -104,10 +106,10 @@ function Jax_Call_Post(url, data, func, errfunc, async)
                                         "application/x-www-form-urlencoded");
         request.send(data);
 
-}
+    },
 
-function Jax_Call_Get(url, func, errfunc, async)
-{
+    jaxCallGet: function(url,func,errfunc,async) {
+
         request = HTTP.newRequest();
         request.onreadystatechange = function() {
                 if(request.readyState == 4) {
@@ -126,5 +128,7 @@ function Jax_Call_Get(url, func, errfunc, async)
         request.open("GET", url, async);
         request.send(null);
 
-}
+    }
 
+
+};
