@@ -1,544 +1,280 @@
-var PANE = { 
-		REGISTRATION : 0,
-		LOGIN : 1
-	};
 
-var reEmailValidation = /^\w+[\w.]+?\w+@\w+[\w.]+?\.{1}\w+\s*$/;
-var passLen = 6;
-var userLen = 6;
-var userID;
-var phoneLen = 10;
-var zipcodeLen = 5;
-var host = "http://192.168.0.197:8080";
+var App = {
+
+    host: "http://192.168.0.197:8081",
+
+    PANE: { 
+             REGISTRATION: 0,
+             LOGIN: 1,
+	     MAIN: 2
+    },
 
 
-var ERRCODE = {
-                INVALID_PASSWORD:"Password length must be at least 6 characters",
-                        PASSWORD_MISMATCH:"Passwords do not match"
-                 };
+    initialize: function() {
 
-function getCookie(name) 
-{
-	var start = document.cookie.indexOf( name + "=" );
-	var len = start + name.length + 1;
+        roomPane.init();
+        userPane.init();
+        chatPane.init(); 
 
-	if ( ( !start ) && ( name != document.cookie.substring( 0, name.length ) ) ) {
-		return null;
-	}
-
-	if ( start == -1 ) return null;
-		var end = document.cookie.indexOf( ";", len );
-	if ( end == -1 ) end = document.cookie.length;
-		return unescape( document.cookie.substring( len, end ) );
-
-}
-
-function createCookie(name,value,days) 
-{
-        if (days) {
-                var date = new Date();
-                date.setTime(date.getTime()+(days*24*60*60*1000));
-                var expires = "; expires="+date.toGMTString();
-        }
-        else var expires = "";
-        document.cookie = name+"="+value+expires+"; path=/";
-}
-
-function eraseCookie(name) 
-{
-        createCookie(name,"",-1);
-}
-
-function logOut()
-{
-	deleteRoomPaneLogout();	
-	deleteMsgUserPane();
-	document.getElementById('logout_room_box').style.display = 'none';
-
-	for(i=0; i<arguments.length; i++) {
-		eraseCookie(arguments[i]);
-	}
-	
-}
-
-function init()
-{
-	var stock_SessionID = getCookie('stock_SessionID');
 	var roomSelected = getCookie('roomSelected');
+	var sessionID = getCookie('stock_SessionID');
 
-	if ((stock_SessionID != null && stock_SessionID != 'null')) {
-		document.getElementById('login').style.display = 'none';
-		document.getElementById('logged_on').style.display = 'block';
-		document.getElementById('main_sub_panel').style.display = 'block';
-		document.getElementById('landing_panel').style.display = 'none';
-		document.getElementById('register_panel').style.display = 'none';	
+        if(sessionID != null && sessionID != 'null')
+        {   
+            App.changePane(document,App.PANE.MAIN);  
 
-		if(roomSelected == null || roomSelected == 'null')
-		{
-			loadRooms();
-		}
-		else
-		{
-			setRoomPane(roomSelected);
-		}
-	}
-	
-}
-
-function loadRooms()
-{
-
-	var url = host + "/chatBox/cgi-bin/jax_server.cgi?req=roomIDs";
-
-	Jax_Call_Get(url, function() { loadRoomPane(request.responseText); }, errStatus, true); 
-
-}
-
-function loadRoomPane(rspObj)
-{
-	
-	var roomArray = eval (rspObj);
-	var roomSelDiv = document.getElementById('top_sel_con');
-
-	for(i=0;  i < roomArray.length; i++) 
-	{
-		var newRmDiv = document.createElement("div");	
-		var rmTxtNode = document.createTextNode(roomArray[i]);	
-		newRmDiv.appendChild(rmTxtNode);
-
-		newRmDiv.className = i % 2 ? ' roomDiv1' : ' roomDiv2';
-
-		if(window.attachEvent) 
-		{
-			newRmDiv.attachEvent('onclick', logIntoRoom);
-		}
-		else
-		{
-			newRmDiv.addEventListener('click', logIntoRoom, false);
-		}
-		
-		roomSelDiv.appendChild(newRmDiv);
-
-	}
-
-}
-
-function deleteLoadRoomPane()
-{
-	deleteRoomPaneLogout();
-	loadRooms();
-	deleteMsgUserPane();
-	document.getElementById('logout_room_box').style.display = 'none';
-}
-
-function finalLogout()
-{
-	var sessID = getCookie('stock_SessionID');
-	if(sessID == null || sessID == 'null' || sessID == undefined || sessID == 'undefined')
-	  return;
-
-	deleteRoomPaneLogout();
-	deleteMsgUserPane();
-	document.getElementById('logout_room_box').style.display = 'none';
-}
-
-function deleteRoomPane()
-{
-	var roomSelDiv = document.getElementById('top_sel_con');
-	
-	while(roomSelDiv.hasChildNodes())
-	{
-
-		if(window.attachEvent)
-		{
-			roomSelDiv.firstChild.detachEvent("onclick", logIntoRoom);
-		}
-		else
-		{
-			roomSelDiv.firstChild.removeEventListener("click", logIntoRoom, false);
-		}
-		
-		roomSelDiv.removeChild(roomSelDiv.firstChild);
-	}
-	document.getElementById('logout_room_box').style.display = 'none';
-}
-
-function deleteRoomPaneLogout()
-{
-	var stock_UserID = getCookie('stock_UserID');
-	var roomSelected = getCookie('roomSelected');
-
-	var roomSelDiv = document.getElementById('top_sel_con');
-	var postString;
-	
-	while(roomSelDiv.hasChildNodes())
-	{
-		if(window.attachEvent)
-		{
-			roomSelDiv.firstChild.detachEvent("onclick", logIntoRoom);
-		}
-		else
-		{
-			roomSelDiv.firstChild.removeEventListener("click", logIntoRoom, false);
-		}
-
-		roomSelDiv.removeChild(roomSelDiv.firstChild);
-	}
-
-	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
-
-	postString  = "req=roomLogout&";
-	postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
-	postString += "roomID=" + encodeURIComponent(roomSelected);
-
-	eraseCookie('roomSelected');
-	deleteChatPane();
-
-	if(jaxPingCancelID) 
-		clearInterval(jaxPingCancelID);
-
-	Jax_Call_Post(url, postString, function() { document.getElementById('logout_room_box').style.display = 'none'; }, errStatus, false); 
-
-
-}
-
-function logIntoRoom()
-{
-	var roomDiv;
-	var stock_UserID = getCookie('stock_UserID');
-
-	if(window.attachEvent)
-	{
-		roomDiv = window.event.srcElement;
-	}
-	else
-	{
-		roomDiv = this;
-	}	
-
-
-	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
-
-         postString  = "req=roomLogin&";
-         postString += "userID=" + encodeURIComponent(stock_UserID) + "&";
-         postString += "roomID=" + encodeURIComponent(roomDiv.firstChild.data);
-
-	Jax_Call_Post(url, postString, 
-			function() {  
-				createCookie('roomSelected', roomDiv.firstChild.data);
-				setRoomPane(roomDiv.firstChild.data);
-				startAjaxPing(stock_UserID,roomDiv.firstChild.data);	
-			}, 
-			errStatus, 
-			true); 
-
-}
-
-function setRoomPane(roomDivText)
-{
-	deleteRoomPane();
-	var newRmDiv = document.createElement("div")
-	var rmTxtNode = document.createTextNode(roomDivText);
-	newRmDiv.appendChild(rmTxtNode);	
-	newRmDiv.className = ' roomDiv1';
-
-	var roomSelDiv = document.getElementById('top_sel_con');
-	roomSelDiv.appendChild(newRmDiv);	
-	
-	var rmLogOut = document.getElementById('logout_room_box');	
-	rmLogOut.style.display = 'block';
-
-	
-	//--------------------------------------------------------	
-	//Look into DOM structure of container for additional node
-	//--------------------------------------------------------	
-
-}
-
-function setMsgUserPane(rspObj)
-{
-
-	deleteMsgUserPane();
-
-        var jSonCO = eval (rspObj);
-
-	if (jSonCO == null || jSonCO == 'null' || jSonCO == undefined || jSonCO == 'undefined')
-		return;
-	if (jSonCO.msg_user_ids == null || jSonCO.msg_user_ids == 'null' || jSonCO.msg_user_ids == undefined || jSonCO.msg_user_ids == 'undefined')
-		return;
-
-        var userPaneDiv = document.getElementById('bot_disp_con');
-
-	var stockID = getCookie('stock_UserID');
-
-
-        for(i=0;  i < jSonCO.msg_user_ids.length; i++)
-        {
-		if(jSonCO.msg_user_ids[i] == stockID)
-			continue;
-                var newUserDiv = document.createElement("div");
-                var userTxtNode = document.createTextNode(jSonCO.msg_user_ids[i]);
-                newUserDiv.appendChild(userTxtNode);
-
-                newUserDiv.className = i % 2 ? ' userDiv1' : ' userDiv2';
-                userPaneDiv.appendChild(newUserDiv);
+            if(roomSelected == null || roomSelected == 'null')
+                roomPane.loadRooms();
         }
 
-}
+    },
 
-function deleteMsgUserPane()
-{
-        var userPaneDiv = document.getElementById('bot_disp_con');
+    suspend: function() {
 
-        while(userPaneDiv.hasChildNodes())
-        {
-                userPaneDiv.removeChild(userPaneDiv.firstChild);
+	var sessionID = getCookie('stock_SessionID');
+
+        if(sessionID == null || sessionID == 'null' || sessionID == undefined || sessionID == 'undefined')
+               return; 
+
+        roomPane.logOutRoom();
+        document.getElementById('logout_room_box').style.display = 'none';
+
+    },
+
+    logOut: function() {
+
+        roomPane.logOutRoom();
+        document.getElementById('logout_room_box').style.display = 'none';
+
+        for(i=0; i<arguments.length; i++) {
+                eraseCookie(arguments[i]);
         }
-}
 
-function setChatPane(rspObj)
-{
+    },
 
-	var chatPaneDiv = document.getElementById('chat_panel');
-	var jSonCO = eval(rspObj);
+    logOutRoomReload: function() {
+        
+        App.suspend();
+        roomPane.loadRooms();
+    },
 
-	if (jSonCO == null || jSonCO == 'null' || jSonCO == undefined || jSonCO == 'undefined')
-		return;
-	if (jSonCO.messages == null || jSonCO.messages == 'null' || jSonCO.messages == undefined || jSonCO.messages == 'undefined')
-		return;
+    changePane: function(doc,pane) {
 
-	for(i=0; i < jSonCO.messages.length; i++)
-	{
-		var newChatMsgDiv = document.createElement("div");
-		var newSpan = document.createElement("span");
-		newSpan.style.fontWeight = "bold";
-		var userSpanTxtNode = document.createTextNode(jSonCO.messages[i].user_id + ": ");
-		newSpan.appendChild(userSpanTxtNode);
-		var msgStr = jSonCO.messages[i].msg_text; 	
-		var userTxtNode = document.createTextNode(msgStr);
-		newChatMsgDiv.appendChild(newSpan);
-		newChatMsgDiv.appendChild(userTxtNode);
+       if(pane == this.PANE.REGISTRATION)
+       {
+                doc.getElementById('landing_panel').style.display = 'none';
+                doc.getElementById('main_sub_panel').style.display = 'none';
+                doc.getElementById('register_panel').style.display = 'block';
 
-		newChatMsgDiv.className = chatPaneDiv.childNodes.length % 2 ? ' chatMsgDiv1' : ' chatMsgDiv2'; 
+       }
+       else if(pane == this.PANE.LOGIN)
+       {
+                doc.getElementById('landing_panel').style.display = 'block';
+                doc.getElementById('register_panel').style.display = 'none';
+                doc.getElementById('main_sub_panel').style.display = 'none';
+                doc.getElementById('login').style.display = 'block';
+                doc.getElementById('logged_on').style.display = 'none';
 
-		chatPaneDiv.appendChild(newChatMsgDiv);
-	}
-	newChatMsgDiv.scrollIntoView();	
-}
-
-function deleteChatPane()
-{
-	var chatPaneDiv = document.getElementById('chat_panel');
-	
-	while(chatPaneDiv.hasChildNodes())
-	{
-		chatPaneDiv.removeChild(chatPaneDiv.firstChild);
-	}
-}
+       }
+       else
+       {
+                doc.getElementById('landing_panel').style.display = 'none';
+                doc.getElementById('register_panel').style.display = 'none';
+                doc.getElementById('main_sub_panel').style.display = 'block';
+                doc.getElementById('login').style.display = 'none';
+                doc.getElementById('logged_on').style.display = 'block';
+                App.displayLoggedOn();
+                roomPane.loadRooms();
+		userPane.userID = getCookie('stock_UserID');
+       }
 
 
-function changePane(obj,pane)
-{
-	var doc = obj;
-	if(pane == PANE.REGISTRATION) 
-	{
-		doc.getElementById('landing_panel').style.display = 'none';
-		doc.getElementById('main_sub_panel').style.display = 'none';
-		doc.getElementById('register_panel').style.display = 'block';	
+    },
 
-	}
-	else if(pane == PANE.LOGIN)
-	{
-		doc.getElementById('landing_panel').style.display = 'block';
-		doc.getElementById('register_panel').style.display = 'none';	
-		doc.getElementById('main_sub_panel').style.display = 'none';
-		doc.getElementById('login').style.display = 'block';
-		doc.getElementById('logged_on').style.display = 'none';
+    displayLoggedOn: function() {
 
-	}
-	else
-	{
-		doc.getElementById('landing_panel').style.display = 'none';
-		doc.getElementById('register_panel').style.display = 'none';	
-		doc.getElementById('main_sub_panel').style.display = 'block';	
-		doc.getElementById('login').style.display = 'none';
-		doc.getElementById('logged_on').style.display = 'block';
-		displayLoggedOn();
-		loadRooms();
-	}
+        var userID = getCookie('stock_UserID');
+        var spanLoggedOn = document.getElementById('form_login');
+        spanLoggedOn.innerHTML = userID + " LOGGED IN | " +
+        " <a href=\"javascript:App.changePane(document,App.PANE.LOGIN)\" style=\"margin-top:10px;\" " +
+	"  onclick=\"App.logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> ";
+    }
+
+};
 
 
-}
+var Utility = {
 
-function displayLoggedOn()
-{
-	stock_UserID = getCookie('stock_UserID');
-	var spanLoggedOn = document.getElementById('form_login');
-	spanLoggedOn.innerHTML = stock_UserID + " LOGGED IN | " +
-	" <a href=\"javascript:changePane(document,PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> ";
-
-}
+    emailValidation:  /^\w+[\w.]+?\w+@\w+[\w.]+?\.{1}\w+\s*$/,
+    passLen:  6,
+    userLen:  6,
+    phoneLen:  10,
+    zipcodeLen: 5,
 
 
-function validateRegistration()
-{
-   var regForm = arguments[0];
-   var state = true;
+    validateRegistration: function(regForm) {
 
-   clearValidationRegistration(regForm);
+        var state = true;
+        this.clearValidationRegistration(regForm);
+        
+        if (! this.emailValidation.test(regForm.email.value)) {
+            document.getElementById("val_email").style.visibility = "visible";
+            state = false
+        }
+        
+        if(regForm.userName.value.length < this.userLen) {
+            document.getElementById("val_username").style.visibility = "visible";
+            state = false
+        }
+        
+        if(regForm.password.value.length < this.passLen) {
+            document.getElementById("val_password").style.visibility = "visible";
+            state = false
+        }
+        
+        regForm.zipcode.value = regForm.zipcode.value.replace(/\D*/g,"");
+        regForm.zipcode.value = regForm.zipcode.value.substring(0,this.zipcodeLen);
+        
+        regForm.phone.value = regForm.phone.value.replace(/\D*/g,"");
+        regForm.phone.value = regForm.phone.value.substring(0,this.phoneLen);
+        
+        return state;
+        
+    },
 
-   var regForm = arguments[0];
-   if (! reEmailValidation.test(regForm.email.value)) {
-        document.getElementById("val_email").style.visibility = "visible";
-        state = false
-   }
+    clearValidationRegistration: function(regForm) {
 
-   if(regForm.userName.value.length < userLen) {
-        document.getElementById("val_username").style.visibility = "visible";
-        state = false
-   }
+        document.getElementById("val_email").style.visibility = "hidden";
+        document.getElementById("val_username").style.visibility = "hidden";
+        document.getElementById("val_password").style.visibility = "hidden";
 
-   if(regForm.password.value.length < passLen) {
-        document.getElementById("val_password").style.visibility = "visible";
-        state = false
-   }
+    },
 
-   regForm.zipcode.value = regForm.zipcode.value.replace(/\D*/g,"");
-   regForm.zipcode.value = regForm.zipcode.value.substring(0,zipcodeLen);
 
-   regForm.phone.value = regForm.phone.value.replace(/\D*/g,"");
-   regForm.phone.value = regForm.phone.value.substring(0,phoneLen);
+    processSignInForm: function(form) {
 
-   return state;
+        document.getElementById("err_text").innerHTML =  "";
+        var i;
+        var request;
+        var postString = "";
+        var frm = form;
+        var url = App.host + Jax.serverAuthURL;
 
-}
+        var frmElements = form.elements;
 
-function clearValidationRegistration()
-{
-   var regForm = arguments[0];
-   document.getElementById("val_email").style.visibility = "hidden";
-   document.getElementById("val_username").style.visibility = "hidden";
-   document.getElementById("val_password").style.visibility = "hidden";
+        for (i=0; i < frmElements.length-1; i++)
+        {
+                postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value) + "&";
+        }
+        postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value);
+        postString = postString.replace(/%20/g,"+");
 
-}
+        Jax.jaxCallPost(url, postString,
+                                function() {  setTimeout('App.changePane(document,App.PANE.MAIN)',500); },
+                                function() {  document.getElementById("err_text").innerHTML =  Jax.responseStatusText; },
+                                 true);
 
-function processSignInForm(form)
-{
+    },
+        
+    clearSignInForm: function(form) {
 
-	//Adhoc will replace with more structured code
-	document.getElementById("err_text").innerHTML =  ""; 
-	var i;
-	var request;
-	var postString = "";
-	var frm = form;
-	var url = host + "/chatBox/cgi-bin/jax_authenticate.cgi";
-	var frmElements = form.elements;
+        form.userName.value = "";
+        form.userPass.value = "";
+    },
+ 
+    processRegForm: function(form) {
 
-	for (i=0; i < frmElements.length-1; i++) 
-	{
-		postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value) + "&";
-	}
-	postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value);
-	postString = postString.replace(/%20/g,"+");	
+        if(!this.validateRegistration(form)) return;
 
-	Jax_Call_Post(url, postString, 
-				function() {  setTimeout('changePane(document,null)',1000); },  
-				function() {  document.getElementById("err_text").innerHTML =  jaxResponseStatusText; }, 
-				 true); 
+        var i;
+        var request;
+        var postString = "";
+        var url = App.host + Jax.serverRegURL;
+        var frmElements = form.elements;
 
-}
+        for (i=0; i < frmElements.length-1; i++)
+        {
+                postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value) + "&";
+        }
 
-function clearSignInForm(form)
-{
-	form.userName.value = "";
-	form.userPass.value = "";
-}
-
-function processForm(form)
-{
-
-	if(!validateRegistration(form)) return;
-
-	var i;
-	var request;
-	var postString = "";
-	var url = host + "/chatBox/cgi-bin/jax_registration.cgi";
-	var frmElements = form.elements;
-
-	for (i=0; i < frmElements.length-1; i++) 
-	{
-		postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value) + "&";
-	}
-
-	postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value);
-	postString = postString.replace(/%20/g,"+");	
+        postString += encodeURIComponent(frmElements[i].name) + "=" + encodeURIComponent(frmElements[i].value);
+        postString = postString.replace(/%20/g,"+");
 
 
 
-	Jax_Call_Post(url, postString, 
-					function() {  document.getElementById("reg_response").innerHTML = "<h3>" + jaxResponseText + " </h3> "; }, 
-					function() { document.getElementById("reg_response").innerHTML = " <h3>" + jaxResponseStatusText + " </h3> "; },
-					true); 
+        Jax.jaxCallPost(url, postString,
+                                        function() {  document.getElementById("reg_response").innerHTML = "<h3>" + Jax.responseText + " </h3> "; },
+                                        function() { document.getElementById("reg_response").innerHTML = " <h3>" + Jax.responseStatusText + " </h3> "; },
+                                        true);
 
-}
+    },
 
-function processSend(sendMsg)
-{
-	var request;
-	var postString = "";
-	var url = host + "/chatBox/cgi-bin/jax_server.cgi";
-	var frmElements = sendMsg.elements;
+    processSend: function(sendMsg) {
+
+        var request;
+        var postString = "";
+        var url = App.host + Jax.serverURL;
+        var frmElements = sendMsg.elements;
         var stock_UserID = getCookie('stock_UserID');
         var roomSelected = getCookie('roomSelected');
 
-	postString  = "req=sendMsg&";
-	postString += encodeURIComponent(frmElements[0].name) + "=" + encodeURIComponent(frmElements[0].value) + "&";
-	postString += "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
-	postString  = postString.replace(/%20/g,"+");
+        postString  = "req=sendMsg&";
+        postString += encodeURIComponent(frmElements[0].name) + "=" + encodeURIComponent(frmElements[0].value) + "&";
+        postString += "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
+        postString  = postString.replace(/%20/g,"+");
 
-	//alert(postString);
-	if (roomSelected == null || roomSelected == 'null')
-		return;
-
-
-	but_on();
-	document.chatInput.msgText.value = "";
-	Jax_Call_Post(url, postString, function() { }, errStatus, true); 
+        if (roomSelected == null || roomSelected == 'null')
+                return;
 
 
-}
-
-function but_on(obj)
-{
-	var butDiv = document.getElementById('sub_button');	
-	butDiv.style.backgroundColor = 'gray';
-	butDiv.getElementsByTagName("h1")[0].style.color = 'black';
+        this.but_on();
+        document.chatInput.msgText.value = "";
+        Jax.jaxCallPost(url, postString, function() { }, Utility.errStatus, true);
 
 
-	butDiv.style.color = 'black';
-	setTimeout(but_off,100);
-	function but_off() 
-	{
-		butDiv.style.backgroundColor = 'black'	
-		butDiv.getElementsByTagName("h1")[0].style.color = 'gray';
-	}
-}
+    },
 
-function but_on2(obj)
-{
-	butH2 = document.getElementById('sub1');
-	butH2.style.backgroundColor = 'gray';
-	butH2.style.color = 'black';
-	setTimeout(but_off2,200);
-	function but_off2() 
-	{
-		butH2.style.backgroundColor = 'black';
-		butH2.style.color = 'gray';
-	}
-}
+    but_on: function(obj) {
 
-function errStatus()
-{
-	alert(request.statusText);
-}
+        var butDiv = document.getElementById('sub_button');
+        butDiv.style.backgroundColor = 'gray';
+        butDiv.getElementsByTagName("h1")[0].style.color = 'black';
 
+
+        butDiv.style.color = 'black';
+        setTimeout('Utility.but_off()',100);
+    },
+
+
+    but_off: function() {
+
+        var butDiv = document.getElementById('sub_button');
+        butDiv.style.backgroundColor = 'black'
+        butDiv.getElementsByTagName("h1")[0].style.color = 'gray';
+        
+    },
+
+    but_on2: function() {
+
+        var butH2 = document.getElementById('sub1');
+        butH2.style.backgroundColor = 'gray';
+        butH2.style.color = 'black';
+
+        setTimeout('Utility.but_off2()',200);
+    },
+
+    but_off2: function() {
+
+        var butH2 = document.getElementById('sub1');
+        butH2.style.backgroundColor = 'black';
+        butH2.style.color = 'gray';
+    },
+
+
+    errStatus: function() {
+
+        alert(request.statusText);
+    }
+
+        
+};
