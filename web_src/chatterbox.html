@@ -3,19 +3,24 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title> ChatterBox application </title>
-<link rel="stylesheet" href="style.css" type="text/css" />
-<script type="text/javascript" src="/chatBox/web_src/common.js"> </script> 
-<script type="text/javascript" src="/chatBox/web_src/Cookie.js"> </script> 
-<script type="text/javascript" src="/chatBox/web_src/ajax_lib.js"> </script> 
-<script type="text/javascript" src="/chatBox/web_src/Pane.js"> </script> 
+<link rel="stylesheet" href="/chatterBox/web_src/style.css" type="text/css" />
+<link rel="shortcut icon" href="/dcoda.net/gen_rsrc/dc.ico">
+<link rel="icon" href="/dcoda.net/gen_rsrc/dc.ico">
+
+<!-- **************************				  -->
+<!-- Take out json js and incorporate into another module -->
+<!-- ************************** 			  -->
+<script type="text/javascript" src="/chatterBox/web_src/json.js"> </script> 
+<script type="text/javascript" src="/chatterBox/web_src/common.js"> </script> 
+<script type="text/javascript" src="/chatterBox/web_src/ajax_lib.js"> </script> 
+<script type="text/javascript" src="/chatterBox/web_src/Pane.js"> </script> 
 </head>
 <body id="layout" onload="App.initialize()" onunload="App.suspend()">
   <div class="center_div">
      <div id="header">
 	<div id="banner">
-	<!--  <a href="http://192.168.0.197:8080/chatBox/web_src/chatterbox.html"> <img id="banner_image" src="/chatBox/gen_rsrc/DCCHAT_159_30.jpg">  </a> -->
-	  <a href="http://192.168.0.197:8081/chatBox/web_src/chatterbox.html"> <img id="banner_image" src="/chatBox/gen_rsrc/CHAT_BOX_199_26.jpg">  </a> 
-	  <a href="http://192.168.0.197:8081/index.html"> <img id="banner_image2" src="/chatBox/gen_rsrc/INVERT_DCBANNER_CROP2_219_31_2.jpg">  </a> 
+	  <a href="/chatterBox"> <img id="banner_image" src="/chatterBox/gen_rsrc/CHAT_BOX_199_26.jpg">  </a> 
+	  <a href="/dcoda.net"> <img id="banner_image2" src="/chatterBox/gen_rsrc/INVERT_DCBANNER_CROP2_219_31_2.jpg">  </a> 
 	</div>
         <div id="login" style="display:block">
           <form name="frmLogin">
@@ -41,10 +46,10 @@
 	<div id="logged_on">
          <span class="form_login" id="form_login">
            <script language="Javascript" type="text/javascript">
-             stock_UserID = getCookie('stock_UserID');
+             stock_UserID = getCookie('UserID');
              if(stock_UserID != null && stock_UserID.length > 0) {
                 document.write(stock_UserID + " LOGGED IN | " +
-                " <a href=\"javascript:App.changePane(document,App.PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"App.logOut('stock_UserID','stock_SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
+                " <a href=\"javascript:App.changePane(document,App.PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"App.logOut('UserID','SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
              }
           </script>
          </span>

@@ -1,7 +1,7 @@
 
 var App = {
 
-    host: "http://192.168.0.197:8081",
+    host: "",
 
     PANE: { 
              REGISTRATION: 0,
@@ -17,7 +17,7 @@ var App = {
         chatPane.init(); 
 
 	var roomSelected = getCookie('roomSelected');
-	var sessionID = getCookie('stock_SessionID');
+	var sessionID = getCookie('SessionID');
 
         if(sessionID != null && sessionID != 'null')
         {   
@@ -31,7 +31,7 @@ var App = {
 
     suspend: function() {
 
-	var sessionID = getCookie('stock_SessionID');
+	var sessionID = getCookie('SessionID');
 
         if(sessionID == null || sessionID == 'null' || sessionID == undefined || sessionID == 'undefined')
                return; 
@@ -85,7 +85,7 @@ var App = {
                 doc.getElementById('logged_on').style.display = 'block';
                 App.displayLoggedOn();
                 roomPane.loadRooms();
-		userPane.userID = getCookie('stock_UserID');
+		userPane.userID = getCookie('UserID');
        }
 
 
@@ -93,11 +93,11 @@ var App = {
 
     displayLoggedOn: function() {
 
-        var userID = getCookie('stock_UserID');
+        var userID = getCookie('UserID');
         var spanLoggedOn = document.getElementById('form_login');
         spanLoggedOn.innerHTML = userID + " LOGGED IN | " +
         " <a href=\"javascript:App.changePane(document,App.PANE.LOGIN)\" style=\"margin-top:10px;\" " +
-	"  onclick=\"App.logOut('stock_UserID','stock_SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> ";
+	"  onclick=\"App.logOut('UserID','SessionID','Instance','roomSelected')\" target=\"_top\" > LOG OUT </a> ";
     }
 
 };
@@ -215,12 +215,12 @@ var Utility = {
         var postString = "";
         var url = App.host + Jax.serverURL;
         var frmElements = sendMsg.elements;
-        var stock_UserID = getCookie('stock_UserID');
+        var UserID = getCookie('UserID');
         var roomSelected = getCookie('roomSelected');
 
         postString  = "req=sendMsg&";
         postString += encodeURIComponent(frmElements[0].name) + "=" + encodeURIComponent(frmElements[0].value) + "&";
-        postString += "userID=" + encodeURIComponent(stock_UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
+        postString += "userID=" + encodeURIComponent(UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
         postString  = postString.replace(/%20/g,"+");
 
         if (roomSelected == null || roomSelected == 'null')
@@ -278,3 +278,36 @@ var Utility = {
 
         
 };
+
+function getCookie(name,path)
+{
+        var start = document.cookie.indexOf( name + "=" );
+        var len = start + name.length + 1;
+
+        if ( ( !start ) && ( name != document.cookie.substring( 0, name.length ) ) ) {
+                return null;
+        }
+
+        if ( start == -1 ) return null;
+                var end = document.cookie.indexOf( ";", len );
+        if ( end == -1 ) end = document.cookie.length;
+                return unescape( document.cookie.substring( len, end ) );
+
+}
+
+function createCookie(name,value,days)
+{
+        if (days) {
+                var date = new Date();
+                date.setTime(date.getTime()+(days*24*60*60*1000));
+                var expires = "; expires="+date.toGMTString();
+        }
+        else var expires = "";
+        document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function eraseCookie(name)
+{
+        createCookie(name,"",-1);
+}
+

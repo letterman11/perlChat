@@ -10,10 +10,15 @@ var chatPane = {
 
     setPane: function(responseObj) {
 
-       var dataSource = eval(responseObj);
+       var dataSource;
 
-       if (dataSource == null || dataSource == 'null' || dataSource == undefined || dataSource == 'undefined')
-                return;
+       try {
+	       dataSource = JSON.parse(responseObj);
+       }
+       catch (ex) {
+		return;
+       }
+
        if (dataSource.messages == null || dataSource.messages == 'null' || dataSource.messages == undefined || dataSource.messages == 'undefined')
                 return;
 
@@ -61,12 +66,16 @@ var userPane = {
     setPane: function(responseObj) {
 
         userPane.deletePane();
+    
+	var dataSource;
 
-        var dataSource = eval(responseObj);
+	try {
+        	dataSource = JSON.parse(responseObj);
+	}
+	catch (ex) {
+		return;
+        }
 
-
-        if (dataSource == null || dataSource == 'null' || dataSource == undefined || dataSource == 'undefined')
-                return;
         if (dataSource.msg_user_ids == null || dataSource.msg_user_ids == 'null' || dataSource.msg_user_ids == undefined || dataSource.msg_user_ids == 'undefined')
                 return;
 
@@ -110,8 +119,8 @@ var roomPane = {
 
     loadRooms: function() {
         
-        this.userID = getCookie('stock_UserID');
-	App.sessionID = getCookie('stock_SessionID');
+        this.userID = getCookie('UserID');
+	App.sessionID = getCookie('SessionID');
 
 	roomPane.deletePane();
         var url = App.host + Jax.serverURL + "?req=roomIDs";
@@ -121,7 +130,7 @@ var roomPane = {
 
     loadRoomPane: function(responseObj) {
 
-        var roomArray = eval (responseObj);
+        var roomArray = JSON.parse(responseObj);
 
         for(i=0;  i < roomArray.length; i++)
         {

@@ -36,12 +36,12 @@ HTTP.newRequest = function() {
 
 var Jax = {
 
-    pingIntervalTime: 2000,
+    pingIntervalTime: 5000,
     pingCancelID: null,
-    pingURL: "/cgi-bin/chatBox/cgi-bin/jax_ping_msg_server.cgi",
-    serverURL: "/cgi-bin/chatBox/cgi-bin/jax_server.cgi",
-    serverAuthURL: "/cgi-bin/chatBox/cgi-bin/jax_authenticate.cgi",
-    serverRegURL: "/cgi-bin/chatBox/cgi-bin/jax_registration.cgi",
+    pingURL: "/chatterBox/cgi-bin/jax_ping_msg_server.cgi",
+    serverURL: "/chatterBox/cgi-bin/jax_server.cgi",
+    serverAuthURL: "/chatterBox/cgi-bin/jax_authenticate.cgi",
+    serverRegURL: "/chatterBox/cgi-bin/jax_registration.cgi",
     pingPostString: null,
     responseText: null,
     responseStatusText: null,
@@ -88,13 +88,11 @@ var Jax = {
                         if(request.status == 200) {
 				
 				Jax.responseText = request.responseText;
-				//this.requestText = request.responseText;
 				func();
                         }
                         else
                         {
 				Jax.responseStatusText = request.statusText;
-				//this.responseStatusText = request.statusText;
 				errfunc();
                         }
                 }
