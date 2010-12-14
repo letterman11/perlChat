@@ -64,14 +64,14 @@ if (ref $initSessionObject eq 'SessionObject')
 			#JSON creation of room IDs
 			my $js_room_array = " [ ";
 			my $i = 0;
-			$js_room_array .= "'" . @{$room_array}[$i]->[0] . "'";
+			$js_room_array .= "\"" . @{$room_array}[$i]->[0] . "\"";
 			
 			for(++$i; $i < scalar(@{$room_array}); $i++) 
 			{
-				$js_room_array .=  ", '" . @{$room_array}[$i]->[0] ."'";
+				$js_room_array .=  ", \"" . @{$room_array}[$i]->[0] ."\"";
 			}
 
-			$js_room_array .=  " ]; ";
+			$js_room_array .=  " ] ";
 			
 			print $query->header(-status=>200,
 					     -Content_Type=>'text/javascript'
@@ -162,14 +162,14 @@ if (ref $initSessionObject eq 'SessionObject')
 								my $js_msg_user_array = " [ ";
 								my $i = 0;
 	
-								$js_msg_user_array .= "'" . @{$msg_user_array}[$i]->[0] . "'"; 
+								$js_msg_user_array .= "\"" . @{$msg_user_array}[$i]->[0] . "\""; 
 					
 								for(++$i; $i < scalar(@{$msg_user_array}); $i++) 
 								{
-									$js_msg_user_array .=  ", '" . @{$msg_user_array}[$i]->[0] ."'";
+									$js_msg_user_array .=  ", \"" . @{$msg_user_array}[$i]->[0] ."\"";
 								}
 			
-								 $js_msg_user_array .= " ]; ";
+								 $js_msg_user_array .= " ] ";
 		
 								print $query->header(-status=>'200 OK',
 							     				-Content_Type=>'text/javascript'
@@ -222,14 +222,14 @@ if (ref $initSessionObject eq 'SessionObject')
 							my $js_msg_user_array = " [ ";
 							my $i = 0;
 
-							$js_msg_user_array .= "'" . @{$msg_user_array}[$i]->[0] . "'"; 
+							$js_msg_user_array .= "\"" . @{$msg_user_array}[$i]->[0] . "\""; 
 				
 							for(++$i; $i < scalar(@{$msg_user_array}); $i++) 
 							{
-								$js_msg_user_array .=  ", '" . @{$msg_user_array}[$i]->[0] ."'";
+								$js_msg_user_array .=  ", \"" . @{$msg_user_array}[$i]->[0] ."\"";
 							}
 		
-							 $js_msg_user_array .= " ]; ";
+							 $js_msg_user_array .= " ] ";
 	
 							print $query->header(-status=>'200 OK',
 						     				-Content_Type=>'text/javascript'

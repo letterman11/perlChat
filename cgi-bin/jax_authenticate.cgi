@@ -50,17 +50,17 @@ if (not defined ($user_row[1])) {
 			    );	
 } else
 {
-	my $stockSessionID = Util::genSessionID();
+	my $SessionID = Util::genSessionID();
 
 	my $sessionInstance = "ses1";
 
-	my $c1 = new CGI::Cookie(-name=>'stock_SessionID',
-			-value=>$stockSessionID,
+	my $c1 = new CGI::Cookie(-name=>'SessionID',
+			-value=>$SessionID,
 			-expires=>undef, 
 			-domain=>$host,  
 			-path=>'/');
 
-	my $c2 = new CGI::Cookie(-name=>'stock_UserID',
+	my $c2 = new CGI::Cookie(-name=>'UserID',
 			-value=>$user_name,
 			-expires=>undef, 
 			-domain=>$host, 
@@ -74,7 +74,7 @@ if (not defined ($user_row[1])) {
 
 
 	Util::storeSession($sessionInstance,
-				$stockSessionID, 
+				$SessionID, 
 				$user_row[$userName]);
 
 	#---- CGI header response ----#

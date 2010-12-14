@@ -6,8 +6,8 @@
 
 
 hostname=localhost
-user=dcoda
-password=dcoda
+user=abrooks
+password=abrooks
 database=Widgets
 
 #hostname=192.168.0.194
