@@ -132,12 +132,6 @@ var Utility = {
             state = false
         }
         
-        regForm.zipcode.value = regForm.zipcode.value.replace(/\D*/g,"");
-        regForm.zipcode.value = regForm.zipcode.value.substring(0,this.zipcodeLen);
-        
-        regForm.phone.value = regForm.phone.value.replace(/\D*/g,"");
-        regForm.phone.value = regForm.phone.value.substring(0,this.phoneLen);
-        
         return state;
         
     },
@@ -218,10 +212,12 @@ var Utility = {
         var UserID = getCookie('UserID');
         var roomSelected = getCookie('roomSelected');
 
+        frmElements[0].value = frmElements[0].value.replace(/\n/g," ")
+
         postString  = "req=sendMsg&";
         postString += encodeURIComponent(frmElements[0].name) + "=" + encodeURIComponent(frmElements[0].value) + "&";
         postString += "userID=" + encodeURIComponent(UserID) + "&" + "roomID=" + encodeURIComponent(roomSelected);
-        postString  = postString.replace(/%20/g,"+");
+        postString = postString.replace(/%20/g,"+");
 
         if (roomSelected == null || roomSelected == 'null')
                 return;

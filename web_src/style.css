@@ -9,7 +9,6 @@ body {
 }
 
 #layout {
-/*	background-color:#edf2f3; */
 	background-color:#c4c4c4;
 
 }
@@ -24,7 +23,6 @@ body {
 }
 
 #header {
-/*	background-color:#00004b; */
 	background-color:black;
 	width:900px;
 	height:85px;
@@ -33,7 +31,6 @@ body {
 
 .main {
 	margin-top:20px;
-/*	background-color:#00004b; */
 	background-color:black;
 	width:900px;
 	height:425px;
@@ -75,7 +72,6 @@ body {
 	padding:5px;
 	color:white;
 	float: right;
-/*	border:solid red; */
 }
 
 .form_login { 
@@ -123,9 +119,6 @@ body {
 #logged_on {
 	display: block;
 	float: right;
-/*	font-size: 20pt;
-	font-family: arial;
-*/
 }
 
 #logged_on .form_login {
@@ -164,15 +157,12 @@ body {
 
 #input_panel {
 	margin-top:25px;
-	/*background-color:#8a9ad2;*/
-/*	background-color:#00004b; */
 	background-color:black;
 	height:75px;	
 	width:auto;
 }
 
 #input_panel textarea {
-/*	background-color:#8a9ad2; */
 	background-color:#c9c9c9;
 	font-size:10pt;
 }
@@ -186,7 +176,7 @@ body {
 	padding:5px;
 	color:gray;
 	float:left;
-	border:solid gray 0.5pt;
+	border:solid gray 1px;
 }
 
 
@@ -315,7 +305,8 @@ body {
 }
 
 .reg_response {
-	float:right;
+	float:left;
+	margin-top:15px;
 	color:gray;
 	width:300px;
 	height:200px;
