@@ -6,6 +6,8 @@ var chatPane = {
 
     init: function() {
       this.paneDiv = document.getElementById('chat_panel');
+      this.chat = document.getElementById('chat_input'); // Fix for extra spaces in send box
+      this.chat.elements[0].value = this.chat.elements[0].value.replace(/\s/g,""); // Fix for extra spaces in send box
     }, 
 
     setPane: function(responseObj) {
@@ -73,6 +75,7 @@ var userPane = {
         	dataSource = JSON.parse(responseObj);
 	}
 	catch (ex) {
+	//	alert("Exception text" + ex.message );
 		return;
         }
 
@@ -119,8 +122,8 @@ var roomPane = {
 
     loadRooms: function() {
         
-        this.userID = getCookie('UserID');
-	App.sessionID = getCookie('SessionID');
+        this.userID = getCookie('chatUserID');
+	App.sessionID = getCookie('chatSessionID');
 
 	roomPane.deletePane();
         var url = App.host + Jax.serverURL + "?req=roomIDs";
@@ -194,6 +197,17 @@ var roomPane = {
 
         while(roomPane.paneDiv.hasChildNodes())
         {
+
+		if(window.addEventListener)
+		{
+                        roomPane.paneDiv.firstChild.removeEventListener("click", roomPane.logIntoRoom, false);
+		}
+		else
+		{
+                        roomPane.paneDiv.firstChild.detachEvent("onclick", roomPane.logIntoRoom);
+		}
+
+/*
                 if(window.attachEvent)
                 {
                         roomPane.paneDiv.firstChild.detachEvent("onclick", roomPane.logIntoRoom);
@@ -202,7 +216,7 @@ var roomPane = {
                 {
                         roomPane.paneDiv.firstChild.removeEventListener("click", roomPane.logIntoRoom, false);
                 }
-
+*/
                 roomPane.paneDiv.removeChild(roomPane.paneDiv.firstChild);
         }
 
@@ -248,6 +262,17 @@ var roomPane = {
         while(roomPane.paneDiv.hasChildNodes())
         {
 
+
+                if(window.addEventListener)
+		{
+                        roomPane.paneDiv.firstChild.removeEventListener("click", roomPane.logIntoRoom, false);
+		}
+		else
+		{
+
+                        roomPane.paneDiv.firstChild.detachEvent("onclick", roomPane.logIntoRoom);
+		}
+/*
                 if(window.attachEvent)
                 {
                         roomPane.paneDiv.firstChild.detachEvent("onclick", roomPane.logIntoRoom);
@@ -256,7 +281,7 @@ var roomPane = {
                 {
                         roomPane.paneDiv.firstChild.removeEventListener("click", roomPane.logIntoRoom, false);
                 }
-
+*/
                 roomPane.paneDiv.removeChild(roomPane.paneDiv.firstChild);
         }
         document.getElementById('logout_room_box').style.display = 'none';
