@@ -1,15 +1,18 @@
 #!/usr/bin/perl -wT
 
 use strict;
-use lib "/home/abrooks/www/chatterBox/script_src";
+#use lib "/services/webpages/d/c/dcoda.net/private/chatterBox/script_src";
+use lib "/home/ubuntu/tools/perl5/site_perl";
+use lib "/home/ubuntu/workspace/dcoda_net/private/chatterBox/script_src";
+require '/home/ubuntu/workspace/dcoda_net/cgi-bin/chatterBox/cgi-bin/config.pl';
 use Util;
 use DbConfig;
 use CGI qw (:standard -debug);
 use CGI::Cookie;
 use CGI::Carp;
-use CGI::Carp qw(fatalsToBrowser);
+#use CGI::Carp qw(fatalsToBrowser);
 use DBI;
-require '/home/abrooks/www/chatterBox/cgi-bin/config.pl';
+#require '/services/webpages/d/c/dcoda.net/cgi-bin/chatterBox/cgi-bin/config.pl';
 
 $CGI::POST_MAX=1024 * 10;  # max 10K posts
 $CGI::DISABLE_UPLOADS = 1;  # no uploads
@@ -22,8 +25,9 @@ if (ref $initSessionObject eq 'SessionObject')
 {
         #TO DO: Restructure handling of db login failure
         my $dbconf = DbConfig->new();
-        my $dbh = DBI->connect( "dbi:mysql:"
-                        . $dbconf->dbName() . ":"
+        my $dbh = DBI->connect( "dbi:SQLite:dbname="
+#                        . $dbconf->dbName() . ":"
+                        . $dbconf->dbName() . ""
                         . $dbconf->dbHost(),
                         $dbconf->dbUser(),
                         $dbconf->dbPass(), $::attr )
@@ -129,25 +133,27 @@ if (ref $initSessionObject eq 'SessionObject')
 					my $json_co = ();
 					my ($user_id,$msg_user_id,$room_id,$msg_text,$time_stamp,$msg_q_id) = (1,5,2,4,3,0);
 					my $i = 0;
-					$json_co = "  { \n \"messages\" : [ \n"
-						 . "  { "
-						 . "		\"user_id\" : \"" . @{$msg_queue_array}[$i]->[$user_id]	. "\", \n"
-						 . "		\"room_id\" : \"" . @{$msg_queue_array}[$i]->[$room_id] 	. "\", \n"
-						 . "		\"msg_text\" : \"" . @{$msg_queue_array}[$i]->[$msg_text]	. "\", \n"
-						 . "		\"msg_q_id\" : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", \n"
-						 . "		\"time_stamp\" : \"" . @{$msg_queue_array}[$i]->[$time_stamp]	. "\" \n"
-						 . " } " ;
+					$json_co =  qq/  { \n "messages" : [ \n
+						   { 
+						 		"user_id" :  "@{$msg_queue_array}[$i]->[$user_id]", \n
+						 		"room_id" :  "@{$msg_queue_array}[$i]->[$room_id]", \n
+						 		"msg_text" : "@{$msg_queue_array}[$i]->[$msg_text]", \n
+						 		"msg_q_id" : "@{$msg_queue_array}[$i]->[$msg_q_id]", \n
+						 		"time_stamp" : "@{$msg_queue_array}[$i]->[$time_stamp]" \n
+						  } / ;
 						
 					for(++$i; $i < scalar(@{$msg_queue_array}); $i++) 
 					{
-						$json_co .= " " 
-						 . ",\n { "
-						 . "		\"user_id\" : \"" . @{$msg_queue_array}[$i]->[$user_id]	. "\", \n"
-						 . "		\"room_id\" : \"" . @{$msg_queue_array}[$i]->[$room_id] 	. "\", \n"
-						 . "		\"msg_text\" : \"" . @{$msg_queue_array}[$i]->[$msg_text]	. "\", \n"
-						 . "		\"msg_q_id\" : " . @{$msg_queue_array}[$i]->[$msg_q_id]	. ", \n"
-						 . "		\"time_stamp\" : \"" . @{$msg_queue_array}[$i]->[$time_stamp]	. "\" \n"
-						 . " } \n" ;
+
+					$json_co .=  qq/ 
+						    , \n { 
+						 		"user_id" :  "@{$msg_queue_array}[$i]->[$user_id]", \n
+						 		"room_id" :  "@{$msg_queue_array}[$i]->[$room_id]", \n
+						 		"msg_text" : "@{$msg_queue_array}[$i]->[$msg_text]", \n
+						 		"msg_q_id" : "@{$msg_queue_array}[$i]->[$msg_q_id]", \n
+						 		"time_stamp" : "@{$msg_queue_array}[$i]->[$time_stamp]" \n
+						  }  \n / ;
+						
 					}
 					
 					$json_co .= " ] ";
@@ -156,10 +162,12 @@ if (ref $initSessionObject eq 'SessionObject')
 					
 						if (scalar(@{$msg_user_array}) > 1) 
 						{
-							$js_msg_user_array = " \"msg_user_ids\" : [ ";
-							my $i = 0;
 
 							$js_msg_user_array .= "\"" . @{$msg_user_array}[$i]->[0] . "\""; 
+
+                                                        my $i = 0;
+                                                        $js_msg_user_array =  qq/  "msg_user_ids" : [ "@{$msg_user_array}[$i]->[0]"  /;
+
 				
 							for(++$i; $i < scalar(@{$msg_user_array}); $i++) 
 							{
