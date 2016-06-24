@@ -46,10 +46,10 @@
 	<div id="logged_on">
          <span class="form_login" id="form_login">
            <script language="Javascript" type="text/javascript">
-             stock_UserID = getCookie('UserID');
-             if(stock_UserID != null && stock_UserID.length > 0) {
-                document.write(stock_UserID + " LOGGED IN | " +
-                " <a href=\"javascript:App.changePane(document,App.PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"App.logOut('UserID','SessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
+            chatUserID = getCookie('chatUserID');
+             if(chatUserID != null && chatUserID.length > 0) {
+                document.write(chatUserID + " LOGGED IN | " +
+                " <a href=\"javascript:App.changePane(document,App.PANE.LOGIN)\" style=\"margin-top:10px;\" onclick=\"App.logOut('chatUserID','chatSessionID','Instance')\" target=\"_top\" > LOG OUT </a> ");
              }
           </script>
          </span>
@@ -120,6 +120,11 @@
 	</h2>
     </div>
    </div>
+   <div style="clear:both" </div>
+       <div id="footer">
+	 <hr style="height:5px; background-color:black">
+        <p class="foot"> Copyright Digital Coda LLC 2010 | All Rights Reserved | angusbrooks@gmail.com </p> 
+       </div>
 <!-- end panel -->
 
  </div>
