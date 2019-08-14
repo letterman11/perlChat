@@ -1,14 +1,15 @@
 #!/usr/bin/perl -wT
 
 use strict;
-use lib "/home/abrooks/www/chatterBox/script_src";
+#use lib "/services/webpages/d/c/dcoda.net/private/chatterBox/script_src";
+#use lib "/home/angus/dcoda_net/lib";
+use lib "/home/angus/dcoda_net/private/chatterBox/script_src";
+require "/home/angus/dcoda_net/cgi-bin/chatterBox/cgi-bin/config.pl";
 use Util;
 use DbConfig;
 use CGI qw /:standard/;
 use CGI::Cookie;
 use CGI::Carp qw(fatalsToBrowser);
-use DBI;
-require '/home/abrooks/www/chatterBox/cgi-bin/config.pl';
 
 
 $CGI::POST_MAX=1024 * 10;  # max 10K posts
@@ -19,15 +20,17 @@ my $userName = 1;
 my $userPass = 2;
 my $startpage="/home/abrooks/www/chatterBox/web_src/chatterapp.html";
 my $query = new CGI;
-my $host = $::GLOBALS->{HOST}; # !!! change for production server to dcoda.net
 
-my $dbconf = DbConfig->new();
-my $dbh = DBI->connect( "dbi:mysql:"  
-		. $dbconf->dbName() . ":"
-		. $dbconf->dbHost(), 
-		$dbconf->dbUser(), 
-		$dbconf->dbPass(), $::attr )
-        	or die "Cannot Connect to Database $DBI::errstr\n";
+#my $host = $::GLOBALS->{HOST}; # !!! change for production server to dcoda.net
+#my $host = "pyperl-bluelimit.c9users.io";
+
+my $host = undef;
+
+my $dbc = DbConfig->new()
+        	or die "Cannot Create  Handle \n";
+
+my $dbh = $dbc->connect()
+        	or die "Cannot create connection to Database $DBI::errstr \n";
 
 my $user_name = $query->param('userName');
 my $user_pass = $query->param('userPass');
@@ -35,41 +38,62 @@ my $user_pass = $query->param('userPass');
 my $sqlstr = "select USER_ID, USER_NAME, USER_PASSWD from user "
 		. " where USER_NAME = '" 
 		. $user_name . "' and  USER_PASSWD = '" . $user_pass .  "'";
-  
-my $sth = $dbh->prepare($sqlstr);
-$sth->execute();
+
+my $sth;
+
+eval {  
+
+  $sth = $dbh->prepare($sqlstr);
+  $sth->execute();
+
+};
+    carp "sqlout : $sqlstr\n";
+
+if ($@) {
+
+    carp "FAILURE : $sqlstr\n";
+
+}
 
 my @user_row = $sth->fetchrow_array();
 $sth->finish();
 
+
+
 $dbh->disconnect();
 
+#if ($user_row[1] =~ /^\s*\t*$/) {
+
 if (not defined ($user_row[1])) {
+
 	#---- CGI header response ----#
-	print $query->header(-status=>'450 Invalid UserID/Password Entry',
-			    );	
+	print $query->header(-status=>'401 Invalid UserID/Password Entry');	
+        print "Failed Authorization\n";
+	carp("Another failure ack");
+
 } else
 {
+
 	my $SessionID = Util::genSessionID();
 
 	my $sessionInstance = "ses1";
 
-	my $c1 = new CGI::Cookie(-name=>'SessionID',
+	my $c1 = new CGI::Cookie(-name=>'chatSessionID',
 			-value=>$SessionID,
 			-expires=>undef, 
-			-domain=>$host,  
+			-domain=>$host,
 			-path=>'/');
 
-	my $c2 = new CGI::Cookie(-name=>'UserID',
+	my $c2 = new CGI::Cookie(-name=>'chatUserID',
 			-value=>$user_name,
 			-expires=>undef, 
-			-domain=>$host, 
+			-domain=>$host,
 			-path=>'/');
 
 	my $c3 = new CGI::Cookie(-name=>'Instance',
 			-value=>$sessionInstance,
 			-expires=>undef, 
-			-domain=>$host,  
+			-domain=>$host,
 			-path=>'/');
 
 
