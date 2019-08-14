@@ -1,18 +1,14 @@
 #!/usr/bin/perl -wT
 
 use strict;
-#use lib "/services/webpages/d/c/dcoda.net/private/chatterBox/script_src";
-use lib "/home/ubuntu/tools/perl5/site_perl";
-use lib "/home/ubuntu/workspace/dcoda_net/private/chatterBox/script_src";
-require '/home/ubuntu/workspace/dcoda_net/cgi-bin/chatterBox/cgi-bin/config.pl';
+use lib "/home/angus/dcoda_net/private/chatterBox/script_src";
+require '/home/angus/dcoda_net/cgi-bin/chatterBox/cgi-bin/config.pl';
 use Util;
 use DbConfig;
 use CGI qw (:standard -debug);
 use CGI::Cookie;
 use CGI::Carp;
 #use CGI::Carp qw(fatalsToBrowser);
-use DBI;
-#require '/services/webpages/d/c/dcoda.net/cgi-bin/chatterBox/cgi-bin/config.pl';
 
 $CGI::POST_MAX=1024 * 10;  # max 10K posts
 $CGI::DISABLE_UPLOADS = 1;  # no uploads
@@ -24,13 +20,11 @@ my $initSessionObject = Util::validateSession();
 if (ref $initSessionObject eq 'SessionObject')
 {
         #TO DO: Restructure handling of db login failure
-        my $dbconf = DbConfig->new();
-        my $dbh = DBI->connect( "dbi:SQLite:dbname="
-#                        . $dbconf->dbName() . ":"
-                        . $dbconf->dbName() . ""
-                        . $dbconf->dbHost(),
-                        $dbconf->dbUser(),
-                        $dbconf->dbPass(), $::attr )
+
+        my $dbc = DbConfig->new()
+                        or die "Cannot Create DB Handle \n";
+
+        my $dbh = $dbc->connect()
                         or die "Cannot Connect to Database $DBI::errstr\n";
 
         my $sqlstr = ();
@@ -213,6 +207,7 @@ if (ref $initSessionObject eq 'SessionObject')
 				$json_co .= " \n} ";
 
 				carp("JSON_CO object: " . $json_co);
+				carp("process ID: " . $$);
 
 				print $query->header(-status=>'200 OK',
 							-Content_Type=>'text/javascript'
