@@ -1,15 +1,20 @@
 #!/usr/bin/perl -wT
 
 use strict;
-use lib "/home/abrooks/www/chatterBox/script_src";
+#use lib "/services/webpages/d/c/dcoda.net/private/chatterBox/script_src";
+#use lib "/home/ubuntu/tools/perl5/site_perl";
+use lib "/home/angus/dcoda_net/private/chatterBox/script_src";
+require '/home/angus/dcoda_net/cgi-bin/chatterBox/cgi-bin/config.pl';
 use Util;
 use DbConfig;
 use CGI qw /:standard/;
 use CGI::Cookie;
 use CGI::Carp;
-use CGI::Carp qw(fatalsToBrowser);
-use DBI;
-require '/home/abrooks/www/chatterBox/cgi-bin/config.pl';
+use POSIX qw(strftime);
+
+#use CGI::Carp qw(fatalsToBrowser);
+#use DBI;
+#require '/services/webpages/d/c/dcoda.net/cgi-bin/chatterBox/cgi-bin/config.pl';
 
 $CGI::POST_MAX=1024 * 10;  # max 10K posts
 $CGI::DISABLE_UPLOADS = 1;  # no uploads
@@ -17,16 +22,15 @@ $CGI::DISABLE_UPLOADS = 1;  # no uploads
 my $query = new CGI;
 my $initSessionObject = Util::validateSession();
 
+my $now_str = strftime ("%Y-%m-%d %H:%M:%S", localtime);
 
 if (ref $initSessionObject eq 'SessionObject')  
 {
 	#TO DO: Restructure handling of db login failure
-	my $dbconf = DbConfig->new();
-	my $dbh = DBI->connect( "dbi:mysql:"  
-			. $dbconf->dbName() . ":"
-			. $dbconf->dbHost(), 
-			$dbconf->dbUser(), 
-			$dbconf->dbPass(), $::attr )
+	my $dbc = DbConfig->new()
+	        	or die "Cannot Create Handle \n";
+
+	my $dbh = $dbc->connect()
 	        	or die "Cannot Connect to Database $DBI::errstr\n";
 	
 	my $sqlstr = ();
@@ -86,7 +90,7 @@ if (ref $initSessionObject eq 'SessionObject')
 		my $userID = $query->param('userID');
 		my $roomID = $query->param('roomID');
 		
-		$sqlstr = "insert into user_cr values ( '$userID', '$roomID', NOW(), '$roomID')";
+		$sqlstr = "insert into user_cr values ( '$userID', '$roomID', '$now_str', '$roomID')";
 
 		
 		carp("INSERT $sqlstr");
@@ -106,7 +110,8 @@ if (ref $initSessionObject eq 'SessionObject')
 				$sqlstr = " update user_cr set  "
 					. " user_id = '$userID', "
 					. " room_id = '$roomID', "
-					. " date_ts = NOW(), "
+					#. " date_ts = datetime(), "
+					. " date_ts = '$now_str', "
 					. " room_name =  '$roomID' "
 					. " where user_id = '$userID' ";
 
@@ -315,7 +320,8 @@ if (ref $initSessionObject eq 'SessionObject')
 				eval {
 
 					$sqlstr2 = "insert into chat_room_queue (user_id, room_id, insert_ts, chat_text, msg_user_id) "
-						 . "values ( '$userID', '$roomID', NOW(), " . $dbh->quote($msgText) . ","
+						 #. "values ( '$userID', '$roomID', datetime(), " . $dbh->quote($msgText) . ","
+						 . "values ( '$userID', '$roomID', '$now_str', " . $dbh->quote($msgText) . ","
 						 . "'" . $msg_user_id->[0] . "' )";
   
 					$sth = $dbh->prepare($sqlstr2);
