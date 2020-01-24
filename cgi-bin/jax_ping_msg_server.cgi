@@ -2,9 +2,9 @@
 
 use strict;
 use lib "/home/angus/dcoda_net/private/chatterBox/script_src";
-require '/home/angus/dcoda_net/cgi-bin/chatterBox/cgi-bin/config.pl';
+#use DbConfig;
+use DbGlob;
 use Util;
-use DbConfig;
 use CGI qw (:standard -debug);
 use CGI::Cookie;
 use CGI::Carp;
@@ -21,11 +21,15 @@ if (ref $initSessionObject eq 'SessionObject')
 {
         #TO DO: Restructure handling of db login failure
 
-        my $dbc = DbConfig->new()
+       # my $dbc = DbConfig->new()
+        my $dbg = DbGlob->new()
                         or die "Cannot Create DB Handle \n";
 
-        my $dbh = $dbc->connect()
+       # my $dbh = $dbc->connect()
+        my $dbh = $dbg->connect()
                         or die "Cannot Connect to Database $DBI::errstr\n";
+
+	#	$dbh->trace(1, 'chat_dbi_ping.log');
 
         my $sqlstr = ();
         my $sqlstr2 = ();
